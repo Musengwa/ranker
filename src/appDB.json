@@ -1,0 +1,11 @@
+{
+    "users": [
+        {"id": 1, "name": "alice", "details": "default", "pfp": "picture", "email": "joe@gmail.com"},
+        {"id": 2, "name": "doe", "details": "default", "pfp": "picture", "email": "joe@gmail.com"},
+        {"id": 3, "name": "alice", "details": "default", "pfp": "picture", "email": "joe@gmail.com"},
+        {"id": 4, "name": "john", "details": "default", "pfp": "picture", "email": "joe@gmail.com"}
+        
+    ],
+
+    "userXvotes":[]
+}
