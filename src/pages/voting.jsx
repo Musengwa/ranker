@@ -1,33 +1,47 @@
-import UserCards from "../components/userCard";
+import UserCard from "../components/userCard";
 import { useEffect, useState } from "react";
-export default function Voting(){
-    const [users, setUsers] = useState([]);
+import axios from "axios";
+import Nav from "../components/nav";
+import { useUser } from "../context/currentUserContext";
 
-    useEffect(()=>{
-        fetch("http://localhost:5000/users").then((response)=> response.json())
-        .then((data) => setUsers(data))
-        .catch((error) => console.error("Error fetching users", error));
-    }, []);
-    const currentUser = {
-        name: "Dohn goated Joe",
-        detail: "dhffh rhrur kurhiuw uruf oioe uufr ueurowu"
-    }
-    return(
-        <>
+export default function Vote() {
+    const { user: currentUser, setUser } = useUser();
+    const [candidates, setCandidates] = useState([]); // State to store candidates
+    
+    // Fetch users from JSON server
+    const fetchUsers = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/users");
+            const users = response.data;
+
+            // Filter out the current user
+            const filteredCandidates = users.filter(user => user.id !== currentUser.id);
+            setCandidates(filteredCandidates);
+
+            // Set the current user
+            const user = users.find(user => user.id === currentUser.id);
+            setUser(user);
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUsers();
+    }, [currentUser]);
+
+    return (
         <div>
-            <h3>candidates</h3>
-            <div>
-                {users.map((user)=>(
-                    <div key={user.id}>
-                       <UserCards user = {user}/> 
-                    </div>
+            <Nav/>
+            <h1>rank</h1>
+            <div className="candidates">
+                {candidates.map(candidate => (
+                    <UserCard
+                        key={candidate.id}
+                        candidate={candidate}
+                        voter={currentUser}
+                    />
                 ))}
             </div>
-            <UserCards user = {currentUser}/>
-        </div>
-        </>
-    )
-}
-
-
-//learn try catch again, promises, throw backs and useEffect one more time
+        </div>);
+        }

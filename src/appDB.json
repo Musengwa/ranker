@@ -1,11 +1,180 @@
 {
-    "users": [
-        {"id": 1, "name": "alice", "details": "default", "pfp": "picture", "email": "joe@gmail.com"},
-        {"id": 2, "name": "doe", "details": "default", "pfp": "picture", "email": "joe@gmail.com"},
-        {"id": 3, "name": "alice", "details": "default", "pfp": "picture", "email": "joe@gmail.com"},
-        {"id": 4, "name": "john", "details": "default", "pfp": "picture", "email": "joe@gmail.com"}
-        
-    ],
-
-    "userXvotes":[]
+  "users": [
+    {
+      "id": "1",
+      "name": "chiseko",
+      "details": "default",
+      "pfp": "picture",
+      "email": "joe@gmail.com",
+      "overAllAttributes": null
+    },
+    {
+      "id": "2",
+      "name": "doe",
+      "details": "default",
+      "pfp": "picture",
+      "email": "joe@gmail.com",
+      "overAllAttributes": null
+    },
+    {
+      "id": "3",
+      "name": "alice",
+      "details": "default",
+      "pfp": "picture",
+      "email": "joe@gmail.com",
+      "overAllAttributes": null
+    },
+    {
+      "id": "4",
+      "name": "john",
+      "details": "default",
+      "pfp": "picture",
+      "email": "joe@gmail.com",
+      "overAllAttributes": null
+    }
+  ],
+  "userXvotes": [
+    {
+      "candidateID": "2",
+      "voterID": "1",
+      "attributes": [
+        {
+          "name": "1",
+          "value": "3"
+        },
+        {
+          "name": "2",
+          "value": "3"
+        },
+        {
+          "name": "3",
+          "value": "3"
+        },
+        {
+          "name": "4",
+          "value": "3"
+        },
+        {
+          "name": "5",
+          "value": "3"
+        },
+        {
+          "name": "6",
+          "value": "3"
+        }
+      ],
+      "id": "4bed"
+    },
+    {
+      "candidateID": "1",
+      "voterID": "2",
+      "attributes": [
+        {
+          "name": "1",
+          "value": "1000"
+        },
+        {
+          "name": "2",
+          "value": "1000"
+        },
+        {
+          "name": "3",
+          "value": "1000"
+        },
+        {
+          "name": "4",
+          "value": "1000"
+        },
+        {
+          "name": "5",
+          "value": "1000"
+        },
+        {
+          "name": "6",
+          "value": "100001"
+        }
+      ],
+      "id": "090a"
+    },
+    {
+      "candidateID": "4",
+      "voterID": "2",
+      "attributes": [
+        {
+          "name": "1",
+          "value": "ff"
+        },
+        {
+          "name": "2",
+          "value": "dd"
+        },
+        {
+          "name": "3",
+          "value": "hjsb"
+        },
+        {
+          "name": "4",
+          "value": "jhsbh"
+        },
+        {
+          "name": "5",
+          "value": "hhjhj"
+        },
+        {
+          "name": "6",
+          "value": "ww"
+        }
+      ],
+      "id": "5f7c"
+    },
+    {
+      "candidateID": "3",
+      "voterID": "2",
+      "attributes": [
+        {
+          "name": "1",
+          "value": "more than 2 cards"
+        }
+      ],
+      "id": "098a"
+    }
+  ],
+  "attribute": [
+    {
+      "id": "1",
+      "name": "name1",
+      "details": "details of the attribute, named name1",
+      "value": null
+    },
+    {
+      "id": "2",
+      "name": "name2",
+      "details": "details of the attribute, named name2",
+      "value": null
+    },
+    {
+      "id": "3",
+      "name": "name3",
+      "details": "details of the attribute, named name3",
+      "value": null
+    },
+    {
+      "id": "4",
+      "name": "name4",
+      "details": "details of the attribute, named name4",
+      "value": null
+    },
+    {
+      "id": "5",
+      "name": "name5",
+      "details": "details of the attribute, named name5",
+      "value": null
+    },
+    {
+      "id": "6",
+      "name": "name6",
+      "details": "details of the attribute, named name6",
+      "value": null
+    }
+  ]
 }

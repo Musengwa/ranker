@@ -1,5 +1,15 @@
-import { createContext} from "react";
+import { createContext, useContext, useState } from "react";
 
-//reate a new context btw this isme learning to useContext
-const userContext = createContext(null);
-export default userContext;
+const UserContext = createContext(null);
+
+export const UserContextProvider = ({ children }) => {
+  const [user, setUser] = useState(null); // State to store the current user
+
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      {children}
+    </UserContext.Provider>
+  );
+};
+
+export const useUser = () => useContext(UserContext);
