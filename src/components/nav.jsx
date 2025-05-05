@@ -24,10 +24,10 @@ export default function Nav() {
       <nav>
         <div className="current-user">{currentUser?.name}</div>
         <ul>
-          <li><Link to="/dash">Home</Link></li>
+          <li><Link to="/">Home</Link></li>
           <li><Link to="/analysis">analysis</Link></li>
           <li><Link to="/voting">Voting</Link></li>
-          <li><Link to="/" onClick={handleLogout}>Logout</Link></li>
+          <li><Link to="/login" onClick={handleLogout}>Logout</Link></li>
         </ul>
       </nav>
     </div>

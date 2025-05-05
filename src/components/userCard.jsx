@@ -1,37 +1,59 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
 export default function UserCard({ candidate, voter }) {
-    // State to store all attribute values
     const [attributeValues, setAttributeValues] = useState({});
+    const [updatedValues, setUpdatedValues] = useState({});
     const [attributes, setAttributes] = useState([]);
 
     // Fetch attributes from JSON server
-    const fetchAttributes = async () => {
+    const fetchAttributes = useCallback(async () => {
         try {
             const response = await axios.get("http://localhost:5000/attribute");
             setAttributes(response.data);
         } catch (error) {
             console.error("Error fetching attributes:", error);
         }
-    };
+    }, []);
+
+    // Fetch existing vote data for the candidate and voter
+    const fetchExistingVote = useCallback(async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/userXvotes", {
+                params: {
+                    candidateID: candidate.id,
+                    voterID: voter.id,
+                },
+            });
+
+            const existingVote = response.data[0]; // Assuming the API returns an array
+            if (existingVote) {
+                const existingAttributeValues = {};
+                existingVote.attributes.forEach((attr) => {
+                    existingAttributeValues[attr.name] = attr.value;
+                });
+                setAttributeValues(existingAttributeValues);
+            }
+        } catch (error) {
+            console.error("Error fetching existing vote:", error);
+        }
+    }, [candidate.id, voter.id]);
 
     useEffect(() => {
         fetchAttributes();
-    }, []);
+        fetchExistingVote();
+    }, [fetchAttributes, fetchExistingVote]);
 
-    // Function to handle changes for individual attributes
-    const handleAttributeChange = (id, value) => {
-        // Update only the specific attribute value in the state
-        setAttributeValues((prevValues) => ({
+    // Handle changes for individual attributes
+    const handleAttributeChange = (name, value) => {
+        setUpdatedValues((prevValues) => ({
             ...prevValues,
-            [id]: value, // Use the attribute ID as the key
+            [name]: value, // Track only changed fields
         }));
     };
 
     const handleAttributesValues = async () => {
         try {
-            // Check if a vote already exists for this candidate and voter
             const existingVoteResponse = await axios.get("http://localhost:5000/userXvotes", {
                 params: {
                     candidateID: candidate.id,
@@ -39,24 +61,23 @@ export default function UserCard({ candidate, voter }) {
                 },
             });
 
-            const existingVote = existingVoteResponse.data[0]; // Assuming the API returns an array
-
-            // Prepare the payload with the updated attribute values
+            const existingVote = existingVoteResponse.data[0];
             const payload = {
                 candidateID: candidate.id,
                 voterID: voter.id,
-                attributes: Object.entries(attributeValues).map(([name, value]) => ({
+                attributes: Object.entries({
+                    ...attributeValues,
+                    ...updatedValues, // Merge existing values with updated values
+                }).map(([name, value]) => ({
                     name,
                     value,
                 })),
             };
 
             if (existingVote) {
-                // Update the existing vote
                 await axios.put(`http://localhost:5000/userXvotes/${existingVote.id}`, payload);
                 alert("Vote updated successfully!");
             } else {
-                // Create a new vote
                 await axios.post("http://localhost:5000/userXvotes", payload);
                 alert("Vote submitted successfully!");
             }
@@ -73,13 +94,13 @@ export default function UserCard({ candidate, voter }) {
             <div className="attributes">
                 {attributes.map((attr) => (
                     <div key={attr.id}>
-                        {/* Render each attribute input field */}
                         <label htmlFor={attr.name}>{attr.name}</label>
                         <input
                             name={attr.name}
-                            value={attributeValues[attr.id] || ""} // Ensure independent values
+                            placeholder={attributeValues[attr.name] || ""} // Show last value as placeholder
+                            defaultValue={updatedValues[attr.name] || ""} // Allow editing
                             type="text"
-                            onChange={(e) => handleAttributeChange(attr.id, e.target.value)} // Update specific attribute
+                            onChange={(e) => handleAttributeChange(attr.name, e.target.value)} // Track changes
                         />
                     </div>
                 ))}

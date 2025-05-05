@@ -10,8 +10,8 @@ function App() {
   return (
     <UserContextProvider>
       <Routes>
-        <Route path="/" element={<Auth />} />
-        <Route path="/dash" element={<Home />} />
+        <Route path="/login" element={<Auth />} />
+        <Route path="/" element={<Home />} />
         <Route path="/voting" element={<Voting />} />
         <Route path="/analysis" element={<Analysis />} />
       </Routes>
