@@ -27,6 +27,7 @@ export default function Nav() {
           <li><Link to="/">Home</Link></li>
           <li><Link to="/analysis">analysis</Link></li>
           <li><Link to="/voting">Voting</Link></li>
+          <li><Link to="/awards">Awards</Link></li>
           <li><Link to="/login" onClick={handleLogout}>Logout</Link></li>
         </ul>
       </nav>
