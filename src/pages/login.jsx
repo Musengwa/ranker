@@ -24,7 +24,7 @@ export default function Login() {
         setUser(foundUser); // Set the user in context
         setError(null); // Clear any previous errors
         alert("Login successful!");
-        navigate("/dash"); // Redirect to the dashboard
+        navigate("/"); // Redirect to the dashboard
       } else {
         setError("Invalid username or ID. Please try again.");
       }

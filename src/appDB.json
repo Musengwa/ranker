@@ -35,6 +35,37 @@
   ],
   "userXvotes": [
     {
+      "candidateID": "4",
+      "voterID": "1",
+      "attributes": [
+        {
+          "name": "1",
+          "value": "44"
+        },
+        {
+          "name": "2",
+          "value": "4"
+        },
+        {
+          "name": "3",
+          "value": "44"
+        },
+        {
+          "name": "4",
+          "value": "4"
+        },
+        {
+          "name": "5",
+          "value": "44"
+        },
+        {
+          "name": "6",
+          "value": "4"
+        }
+      ],
+      "id": "b3d6"
+    },
+    {
       "candidateID": "2",
       "voterID": "1",
       "attributes": [
@@ -63,80 +94,131 @@
           "value": "3"
         }
       ],
-      "id": "4bed"
+      "id": "e176"
     },
     {
-      "candidateID": "1",
-      "voterID": "2",
+      "candidateID": "3",
+      "voterID": "1",
       "attributes": [
         {
           "name": "1",
-          "value": "1000"
+          "value": "2"
         },
         {
           "name": "2",
-          "value": "1000"
+          "value": "22"
         },
         {
           "name": "3",
-          "value": "1000"
+          "value": "22"
         },
         {
           "name": "4",
-          "value": "1000"
+          "value": "2"
         },
         {
           "name": "5",
-          "value": "1000"
+          "value": "2"
         },
         {
           "name": "6",
-          "value": "100001"
+          "value": "2"
         }
       ],
-      "id": "090a"
+      "id": "2e1b"
     },
     {
+      "id": "7f27",
       "candidateID": "4",
       "voterID": "2",
       "attributes": [
         {
           "name": "1",
-          "value": "ff"
+          "value": "23"
         },
         {
           "name": "2",
-          "value": "dd"
+          "value": "23"
         },
         {
           "name": "3",
-          "value": "hjsb"
+          "value": "23"
         },
         {
           "name": "4",
-          "value": "jhsbh"
+          "value": "23"
         },
         {
           "name": "5",
-          "value": "hhjhj"
+          "value": "23"
         },
         {
           "name": "6",
-          "value": "ww"
+          "value": "23"
         }
-      ],
-      "id": "5f7c"
+      ]
     },
     {
+      "id": "694c",
       "candidateID": "3",
       "voterID": "2",
       "attributes": [
         {
           "name": "1",
-          "value": "more than 2 cards"
+          "value": "23"
+        },
+        {
+          "name": "2",
+          "value": "23"
+        },
+        {
+          "name": "3",
+          "value": "12"
+        },
+        {
+          "name": "4",
+          "value": "23"
+        },
+        {
+          "name": "5",
+          "value": "23"
+        },
+        {
+          "name": "6",
+          "value": "23"
         }
-      ],
-      "id": "098a"
+      ]
+    },
+    {
+      "id": "8ce8",
+      "candidateID": "1",
+      "voterID": "2",
+      "attributes": [
+        {
+          "name": "1",
+          "value": "12"
+        },
+        {
+          "name": "2",
+          "value": "12"
+        },
+        {
+          "name": "3",
+          "value": "12"
+        },
+        {
+          "name": "4",
+          "value": "12"
+        },
+        {
+          "name": "5",
+          "value": "12"
+        },
+        {
+          "name": "6",
+          "value": "21"
+        }
+      ]
     }
   ],
   "attribute": [
@@ -175,6 +257,108 @@
       "name": "name6",
       "details": "details of the attribute, named name6",
       "value": null
+    }
+  ],
+  "awards": [
+    {
+      "id": "award-1",
+      "name": "Best Innovator",
+      "description": "Awarded to the most innovative candidate.",
+      "type": "innovation",
+      "years": [
+        {
+          "year": 2024,
+          "winner": "john",
+          "candidates": [
+            {
+              "candidate": "john",
+              "voters": [
+                "chiseko",
+                "doe",
+                "alice"
+              ]
+            },
+            {
+              "candidate": "alice",
+              "voters": [
+                "chiseko",
+                "doe"
+              ]
+            }
+          ]
+        },
+        {
+          "year": 2025,
+          "winner": "alice",
+          "candidates": [
+            {
+              "candidate": "alice",
+              "voters": [
+                "chiseko",
+                "doe",
+                "john"
+              ]
+            },
+            {
+              "candidate": "doe",
+              "voters": [
+                "chiseko",
+                "alice"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "award-2",
+      "name": "Team Player",
+      "description": "Awarded to the best team player.",
+      "type": "teamwork",
+      "years": [
+        {
+          "year": 2024,
+          "winner": "doe",
+          "candidates": [
+            {
+              "candidate": "doe",
+              "voters": [
+                "chiseko",
+                "alice",
+                "john"
+              ]
+            },
+            {
+              "candidate": "chiseko",
+              "voters": [
+                "doe",
+                "alice"
+              ]
+            }
+          ]
+        },
+        {
+          "year": 2025,
+          "winner": "chiseko",
+          "candidates": [
+            {
+              "candidate": "chiseko",
+              "voters": [
+                "doe",
+                "alice",
+                "john"
+              ]
+            },
+            {
+              "candidate": "john",
+              "voters": [
+                "chiseko",
+                "alice"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

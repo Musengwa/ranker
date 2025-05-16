@@ -1,5 +1,6 @@
-make the inputs have last value always ...userCard
-make the update card button update all the cards ...dash
+*it should see if current user is not set render the log in page to set it
+*make the inputs have last value always ...userCard
+*make the update card button update all the cards and an exit button...dash
 analysis make average algorithm
 component 2025awards. this one is big
 add this to dashbord too
@@ -7,5 +8,4 @@ notifications component. for special user only
 grant access to annalysis.
 add AI commentary, idk where yet.(probably notifications)
 style...
-share for testing deploy
-
+share for testing then deploy

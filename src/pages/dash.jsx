@@ -5,13 +5,7 @@ import Nav from "../components/nav";
 import axios from "axios";
 import UserCard from "../components/userCard";
 
-const HandleCard = ({ candidate, voter, onUpdate }) => {
-  const handleUpdate = () => {
-    // Simulate an update action (e.g., API call or state change)
-    console.log("Card updated!");
-    onUpdate(); // Notify the parent component to refresh
-  };
-
+const HandleCard = ({ candidate, voter, onClose }) => {
   return (
     <div>
       <UserCard
@@ -19,7 +13,7 @@ const HandleCard = ({ candidate, voter, onUpdate }) => {
         candidate={candidate}
         voter={voter}
       />
-      <button onClick={handleUpdate}>Update Card</button>
+      <button onClick={onClose}>Close</button>
     </div>
   );
 };
@@ -58,14 +52,21 @@ const HandleDisplay = () => {
     }
   }, []);
 
-  const handleCardUpdate = () => {
-    // Re-fetch votes or update state when the card is updated
+  const handleRefreshCards = () => {
+    // Re-fetch votes to refresh all cards
     handleMyVotes();
+  };
+
+  const handleCloseCard = () => {
+    // Close the selected card
+    setSelectedVote(null);
   };
 
   return (
     <div>
+      <Nav />
       <h3>Your Votes</h3>
+      <button onClick={handleRefreshCards}>Refresh Cards</button>
       <div>
         {myVotes.map(myVote => (
           <section key={myVote.id}>
@@ -88,7 +89,7 @@ const HandleDisplay = () => {
         <HandleCard
           candidate={selectedVote.candidate}
           voter={selectedVote.voter}
-          onUpdate={handleCardUpdate} // Pass the callback to HandleCard
+          onClose={handleCloseCard} // Pass the close callback to HandleCard
         />
       )}
     </div>
@@ -101,15 +102,12 @@ export default function Home() {
 
   useEffect(() => {
     if (!currentUser) {
-      navigate("/");
+      navigate("/login");
     }
   }, [currentUser, navigate]);
 
   return (
-    <div className="home">
-      <Nav />
-      <h1>Welcome to the Voting App</h1>
-      <p>Cast your vote and make your voice heard!</p>
+    <div>
       <HandleDisplay />
     </div>
   );
