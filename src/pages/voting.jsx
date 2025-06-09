@@ -1,15 +1,16 @@
 import UserCard from "../components/userCard";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import Nav from "../components/nav";
 import { useUser } from "../context/currentUserContext";
+import { Helmet } from "react-helmet";
 
 export default function Vote() {
     const { user: currentUser, setUser } = useUser();
     const [candidates, setCandidates] = useState([]); // State to store candidates
     
     // Fetch users from JSON server
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         try {
             const response = await axios.get("http://localhost:5000/users");
             const users = response.data;
@@ -24,14 +25,19 @@ export default function Vote() {
         } catch (error) {
             console.error("Error fetching users:", error);
         }
-    };
+    }, [currentUser, setUser]);
 
     useEffect(() => {
         fetchUsers();
-    }, [currentUser]);
+    }, [fetchUsers]);
 
     return (
         <div>
+            <Helmet>
+                <title>Rank Candidates | Voting Page</title>
+                <meta name="description" content="Vote and rank candidates on the Ranker platform." />
+                <meta name="keywords" content="voting, ranker, candidates, user ranking" />
+            </Helmet>
             <Nav/>
             <h1>rank</h1>
             <div className="candidates">
@@ -43,5 +49,6 @@ export default function Vote() {
                     />
                 ))}
             </div>
-        </div>);
-        }
+        </div>
+    );
+}

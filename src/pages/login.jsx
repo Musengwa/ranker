@@ -1,7 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/currentUserContext";
+import { Helmet } from "react-helmet"; // Add this import
 
 export default function Login() {
   const [username, setUsername] = useState(""); // State for username input
@@ -36,6 +37,11 @@ export default function Login() {
 
   return (
     <div>
+      <Helmet>
+        <title>Login | Ranker</title>
+        <meta name="description" content="Log in to your Ranker account to access your dashboard and manage your rankings." />
+        <meta name="robots" content="index,follow" />
+      </Helmet>
       <form>
         <h1>Log In</h1>
         <div>
