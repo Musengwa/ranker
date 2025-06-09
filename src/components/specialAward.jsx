@@ -57,26 +57,35 @@ export default function Special({ award, onVoted }) {
     if (hasVoted) return <div>You have already voted for this award.</div>;
 
     return (
-        <div>
-            <div className="award">
-                <div className="award-details">
-                    <p>{award.name}</p>
+        <section>
+            <article className="award">
+                <header className="award-details">
+                    <h1>{award.name}</h1>
                     <p>{award.description}</p>
-                </div>
-                <div className="candidates">
+                </header>
+                <section className="candidates">
+                    <h2>Candidates</h2>
                     {candidates.map(candidate => (
-                        <div className="candidate" key={candidate.id}>
-                            <div>image</div>
+                        <article className="candidate" key={candidate.id}>
+                            {/* Replace 'image' with an actual <img> tag if you have candidate images */}
+                            <img 
+                                src={candidate.imageUrl || "/default-avatar.png"} 
+                                alt={`Portrait of ${candidate.name}`} 
+                                width={64} height={64}
+                            />
                             <div className="details">
-                                <p>{candidate.name}</p>
+                                <h3>{candidate.name}</h3>
                             </div>
-                            <button onClick={() => handleVote(candidate)}>
-                                | Vote for {candidate.name} |
+                            <button 
+                                onClick={() => handleVote(candidate)}
+                                aria-label={`Vote for ${candidate.name} for ${award.name}`}
+                            >
+                                Vote for {candidate.name}
                             </button>
-                        </div>
+                        </article>
                     ))}
-                </div>
-            </div>
-        </div>
+                </section>
+            </article>
+        </section>
     );
 }

@@ -2,6 +2,7 @@ import Nav from "../components/nav";
 import SpecialAward from "../components/specialAward";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Helmet } from "react-helmet"; // Add this import
 
 export default function Awards() {
     const [awards, setAwards] = useState([]);
@@ -17,8 +18,13 @@ export default function Awards() {
 
     return (
         <>
+            <Helmet>
+                <title>Awards | Ranker</title>
+                <meta name="description" content="Vote for your favorite awards on Ranker. Discover nominees and winners in various categories." />
+                <meta name="keywords" content="awards, voting, ranker, nominees, winners" />
+            </Helmet>
             <Nav />
-            <div className="awardNav">
+            <nav className="awardNav" aria-label="Awards Navigation">
                 <ul>
                     {awards.map(award => (
                         <li key={award.id}>
@@ -28,12 +34,12 @@ export default function Awards() {
                         </li>
                     ))}
                 </ul>
-            </div>
-            <div>
+            </nav>
+            <main>
                 {selectedAward && (
                     <SpecialAward award={selectedAward} onVoted={() => setSelectedAward(null)} />
                 )}
-            </div>
+            </main>
         </>
     );
 }

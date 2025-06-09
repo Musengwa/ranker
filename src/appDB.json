@@ -4,7 +4,7 @@
       "id": "1",
       "name": "chiseko",
       "details": "default",
-      "pfp": "picture",
+      "pfp": ".images/chloe_moretz_2014-2560x1440.jpg",
       "email": "joe@gmail.com",
       "overAllAttributes": null
     },
@@ -12,7 +12,7 @@
       "id": "2",
       "name": "doe",
       "details": "default",
-      "pfp": "picture",
+      "pfp": ".images/chloe_moretz_sudden_attack_hd-1920x1080.jpg",
       "email": "joe@gmail.com",
       "overAllAttributes": null
     },
@@ -20,7 +20,7 @@
       "id": "3",
       "name": "alice",
       "details": "default",
-      "pfp": "picture",
+      "pfp": ".images/kendall_jenner_vogue_us_2016-1920x1080.jpg",
       "email": "joe@gmail.com",
       "overAllAttributes": null
     },
@@ -28,7 +28,7 @@
       "id": "4",
       "name": "john",
       "details": "default",
-      "pfp": "picture",
+      "pfp": ".images/maisie_williams_nylon_magazine_2016-3840x2160.jpg",
       "email": "joe@gmail.com",
       "overAllAttributes": null
     }
@@ -71,27 +71,27 @@
       "attributes": [
         {
           "name": "1",
-          "value": "3"
+          "value": 34
         },
         {
           "name": "2",
-          "value": "3"
+          "value": 56
         },
         {
           "name": "3",
-          "value": "3"
+          "value": 78
         },
         {
           "name": "4",
-          "value": "3"
+          "value": 93
         },
         {
           "name": "5",
-          "value": "3"
+          "value": 82
         },
         {
           "name": "6",
-          "value": "3"
+          "value": 62
         }
       ],
       "id": "e176"
@@ -128,35 +128,35 @@
       "id": "2e1b"
     },
     {
-      "id": "7f27",
       "candidateID": "4",
       "voterID": "2",
       "attributes": [
         {
           "name": "1",
-          "value": "23"
+          "value": 94
         },
         {
           "name": "2",
-          "value": "23"
+          "value": 47
         },
         {
           "name": "3",
-          "value": "23"
+          "value": 76
         },
         {
           "name": "4",
-          "value": "23"
+          "value": 75
         },
         {
           "name": "5",
-          "value": "23"
+          "value": 34
         },
         {
           "name": "6",
-          "value": "23"
+          "value": 67
         }
-      ]
+      ],
+      "id": "7f27"
     },
     {
       "id": "694c",
