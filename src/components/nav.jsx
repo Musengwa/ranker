@@ -6,8 +6,7 @@ import { useEffect, useState } from "react";
 const navStyles = `
 .ranker-nav-header {
   width: 100%;
-  background: linear-gradient(90deg, #6366f1 0%, #a5b4fc 100%);
-  box-shadow: 0 2px 12px #6366f133;
+   background: linear-gradient(135deg,rgb(0, 0, 0) 0%,rgb(8, 8, 8) 100%);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -24,10 +23,10 @@ const navStyles = `
   color: #fff;
   font-weight: 600;
   font-size: 1.1rem;
-  background: #818cf8;
-  padding: 0.4rem 1rem;
-  border-radius: 2rem;
-  box-shadow: 0 2px 8px #6366f122;
+  background:rgb(14, 14, 14);
+  border-radius: 20px;
+  padding: 0.6rem 1.2rem;
+  border: solid 1px rgb(18, 18, 18);
   margin-right: 1.5rem;
   display: flex;
   align-items: center;
@@ -44,18 +43,18 @@ const navStyles = `
   display: flex;
 }
 .ranker-nav-links a {
-  color: #fff;
-  font-weight: 500;
+  color: rgb(196, 196, 196);
+  font-weight: 300;
   text-decoration: none;
   padding: 0.5rem 1.1rem;
   border-radius: 1.5rem;
   transition: background 0.18s, color 0.18s;
-  font-size: 1rem;
+  font-size: 1.3rem;
   letter-spacing: 0.5px;
 }
 .ranker-nav-links a:hover, .ranker-nav-links a:focus {
   background: #fff;
-  color: #6366f1;
+  color:rgb(29, 29, 29);
   outline: none;
 }
 .ranker-nav-hamburger {
@@ -76,12 +75,12 @@ const navStyles = `
     position: absolute;
     top: 60px;
     right: 10px;
-    background: #6366f1;
+    background:rgb(12, 12, 12);
+    border: 2px solid rgb(25, 25, 25);
     flex-direction: column;
     gap: 0.5rem;
     padding: 1rem 1.2rem;
     border-radius: 1.2rem;
-    box-shadow: 0 4px 16px #6366f144;
     display: none;
     min-width: 140px;
   }
@@ -125,7 +124,7 @@ export default function Nav() {
     <header className="ranker-nav-header">
       <nav className="ranker-nav-bar" aria-label="Main navigation">
         <div className="ranker-nav-user" title="Current User">
-          <span role="img" aria-label="User">👤</span>
+          <span role="img" aria-label="User"></span>
           {currentUser?.name}
         </div>
         <button

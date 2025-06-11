@@ -2,50 +2,90 @@ import axios from "axios";
 import { useUser } from "../context/currentUserContext";
 import { useState, useEffect } from "react";
 
-export default function Special({ award, onVoted }) {
+export default function SpecialAward({ award, onVoted }) {
     const { user: currentUser } = useUser();
     const [candidates, setCandidates] = useState([]);
     const [hasVoted, setHasVoted] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [votedCandidate, setVotedCandidate] = useState(null);
 
-    // Fetch users and check if current user has already voted for this award
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                // Get all users
-                const usersRes = await axios.get("http://localhost:5000/users");
-                const users = usersRes.data;
-                // Candidates: all except current user
-                setCandidates(users.filter(u => u.id !== currentUser.id));
-
-                // Check if user has already voted for this award (in a real app, this would be more robust)
-                const votesRes = await axios.get("http://localhost:5000/awardVotes", {
-                    params: {
-                        awardID: award.id,
-                        voterID: currentUser.id
-                    }
-                });
-                setHasVoted(votesRes.data.length > 0);
-            } catch (err) {
-                console.error("Error loading data:", err);
-            }
-            setLoading(false);
-        };
         fetchData();
+        // eslint-disable-next-line
     }, [award, currentUser]);
 
-    // Handle voting for a candidate
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const usersRes = await axios.get("http://localhost:5000/users");
+            const users = usersRes.data;
+            setCandidates(users.filter(u => u.id !== currentUser.id));
+
+            const awardsRes = await axios.get("http://localhost:5000/awards");
+            const awards = awardsRes.data;
+            const thisAward = awards.find(a => a.id === award.id);
+            const thisYear = thisAward.years.find(y => y.year === new Date().getFullYear());
+
+            let found = false;
+            let votedName = null;
+            if (thisYear) {
+                for (const candidate of thisYear.candidates) {
+                    if (candidate.voters.includes(currentUser.name)) {
+                        found = true;
+                        votedName = candidate.candidate;
+                        break;
+                    }
+                }
+            }
+            setHasVoted(found);
+            if (found) {
+                const voted = users.find(u => u.name === votedName);
+                setVotedCandidate(voted);
+            } else {
+                setVotedCandidate(null);
+            }
+        } catch (err) {
+            console.error("Error loading data:", err);
+        }
+        setLoading(false);
+    };
+
     const handleVote = async (candidate) => {
         if (hasVoted) return;
         try {
-            await axios.post("http://localhost:5000/awardVotes", {
-                awardID: award.id,
-                year: new Date().getFullYear(),
-                candidateID: candidate.id,
-                voterID: currentUser.id
+            const awardsRes = await axios.get("http://localhost:5000/awards");
+            const awards = awardsRes.data;
+            const thisAward = awards.find(a => a.id === award.id);
+            const yearNum = new Date().getFullYear();
+            let thisYear = thisAward.years.find(y => y.year === yearNum);
+
+            if (!thisYear) {
+                thisYear = {
+                    year: yearNum,
+                    winner: null,
+                    candidates: candidates.map(u => ({
+                        candidate: u.name,
+                        voters: []
+                    }))
+                };
+                thisAward.years.push(thisYear);
+            }
+
+            // Remove user from all candidates' voters (in case of re-vote)
+            thisYear.candidates.forEach(c => {
+                c.voters = c.voters.filter(v => v !== currentUser.name);
             });
+
+            // Add to selected candidate
+            const candidateEntry = thisYear.candidates.find(c => c.candidate === candidate.name);
+            if (candidateEntry && !candidateEntry.voters.includes(currentUser.name)) {
+                candidateEntry.voters.push(currentUser.name);
+            }
+
+            await axios.put(`http://localhost:5000/awards/${award.id}`, thisAward);
+
             setHasVoted(true);
+            setVotedCandidate(candidate);
             if (onVoted) onVoted();
             alert("Vote submitted!");
         } catch (err) {
@@ -53,8 +93,53 @@ export default function Special({ award, onVoted }) {
         }
     };
 
+    // NEW: Remove vote and allow voting again
+    const handleVoteAgain = async () => {
+        try {
+            const awardsRes = await axios.get("http://localhost:5000/awards");
+            const awards = awardsRes.data;
+            const thisAward = awards.find(a => a.id === award.id);
+            const yearNum = new Date().getFullYear();
+            let thisYear = thisAward.years.find(y => y.year === yearNum);
+
+            if (thisYear) {
+                thisYear.candidates.forEach(c => {
+                    c.voters = c.voters.filter(v => v !== currentUser.name);
+                });
+                await axios.put(`http://localhost:5000/awards/${award.id}`, thisAward);
+            }
+            setHasVoted(false);
+            setVotedCandidate(null);
+            if (onVoted) onVoted();
+            fetchData();
+        } catch (err) {
+            console.error("Error removing vote:", err);
+        }
+    };
+
     if (loading) return <div>Loading...</div>;
-    if (hasVoted) return <div>You have already voted for this award.</div>;
+    if (hasVoted && votedCandidate) {
+        return (
+            <div>
+                <h3>You have already voted for this award.</h3>
+                <p>Your vote: <b>{votedCandidate.name}</b></p>
+                <img
+                    src={votedCandidate.pfp || "/default-avatar.png"}
+                    alt={`Portrait of ${votedCandidate.name}`}
+                    width={64} height={64}
+                />
+                <br />
+                <button onClick={handleVoteAgain} style={{marginTop: 12}}>Vote Again</button>
+            </div>
+        );
+    }
+    if (hasVoted) return (
+        <div>
+            You have already voted for this award.
+            <br />
+            <button onClick={handleVoteAgain} style={{marginTop: 12}}>Vote Again</button>
+        </div>
+    );
 
     return (
         <section>
@@ -67,9 +152,8 @@ export default function Special({ award, onVoted }) {
                     <h2>Candidates</h2>
                     {candidates.map(candidate => (
                         <article className="candidate" key={candidate.id}>
-                            {/* Replace 'image' with an actual <img> tag if you have candidate images */}
                             <img 
-                                src={candidate.imageUrl || "/default-avatar.png"} 
+                                src={candidate.pfp || "/default-avatar.png"} 
                                 alt={`Portrait of ${candidate.name}`} 
                                 width={64} height={64}
                             />
@@ -79,6 +163,7 @@ export default function Special({ award, onVoted }) {
                             <button 
                                 onClick={() => handleVote(candidate)}
                                 aria-label={`Vote for ${candidate.name} for ${award.name}`}
+                                disabled={hasVoted}
                             >
                                 Vote for {candidate.name}
                             </button>

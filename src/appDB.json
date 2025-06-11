@@ -68,32 +68,7 @@
     {
       "candidateID": "2",
       "voterID": "1",
-      "attributes": [
-        {
-          "name": "1",
-          "value": 34
-        },
-        {
-          "name": "2",
-          "value": 56
-        },
-        {
-          "name": "3",
-          "value": 78
-        },
-        {
-          "name": "4",
-          "value": 93
-        },
-        {
-          "name": "5",
-          "value": 82
-        },
-        {
-          "name": "6",
-          "value": 62
-        }
-      ],
+      "attributes": [],
       "id": "e176"
     },
     {
@@ -281,8 +256,7 @@
             {
               "candidate": "alice",
               "voters": [
-                "chiseko",
-                "doe"
+                "john"
               ]
             }
           ]
@@ -294,17 +268,13 @@
             {
               "candidate": "alice",
               "voters": [
-                "chiseko",
                 "doe",
                 "john"
               ]
             },
             {
               "candidate": "doe",
-              "voters": [
-                "chiseko",
-                "alice"
-              ]
+              "voters": []
             }
           ]
         }
@@ -331,8 +301,7 @@
             {
               "candidate": "chiseko",
               "voters": [
-                "doe",
-                "alice"
+                "doe"
               ]
             }
           ]
@@ -351,10 +320,17 @@
             },
             {
               "candidate": "john",
+              "voters": []
+            },
+            {
+              "candidate": "alice",
               "voters": [
-                "chiseko",
-                "alice"
+                "chiseko"
               ]
+            },
+            {
+              "candidate": "doe",
+              "voters": []
             }
           ]
         }
