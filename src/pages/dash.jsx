@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-// import { useNavigate } from "react-router-dom"; // <-- REMOVE this line
+import { useNavigate } from "react-router-dom"; // Add this import
 import { useUser } from "../context/currentUserContext";
 import Nav from "../components/nav";
 import axios from "axios";
@@ -24,7 +24,7 @@ const dashStyles = `
   font-size: 2.2rem;
   font-weight: 700;
   letter-spacing: 1px;
-  background: linear-gradient(90deg,rgb(40, 117, 243) 0%,rgb(31, 68, 129) 100%);
+  background: linear-gradient(90deg,rgb(166, 172, 180) 0%,rgb(255, 255, 255) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -309,6 +309,13 @@ const HandleDisplay = () => {
   const [users, setUsers] = useState([]);
 
   const { user: currentUser } = useUser();
+  const navigate = useNavigate(); // Add this line
+
+  useEffect(() => {
+    if (!currentUser) {
+      navigate("/login");
+    }
+  }, [currentUser, navigate]);
 
   const handleMyVotes = useCallback(async () => {
     try {

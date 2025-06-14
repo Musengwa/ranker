@@ -1,12 +1,13 @@
-*set current users on log in
-#make the inputs have last value always ...userCard. do this last 
-*make the update card button update all the cards and an exit button...dash
-*... analysis make average algorithm
-*component 2025awards. this one is big
-*add this to analysis too
-#notifications component. for special user only
-*grant access to annalysis.
-#add AI commentary, idk where yet.(probably notifications)
-#... style...
-ADD REAL BACK END JSON Server wont cut it for deployment
+it should see if current user is not set render the log in page to set it
+# make the inputs have last value always ...userCard
+make the update card button update all the cards and an exit button...dash
+analysis make average algorithm
+component 2025awards. this one is big
+add this to dashbord too
+notifications component. for special user only
+grant access to annalysis.
+*add AI commentary, idk where yet.(probably notifications)
+#style...
+***add proper backend
 share for testing then deploy
+// today fix analysis, add icons, fix overall/unify font, find better design for voting/usercard(do not implement) start adding images, use ai to fix award analysis

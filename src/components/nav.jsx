@@ -15,7 +15,7 @@ const navStyles = `
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1100px;
+  width: 100%;
   margin: 0 auto;
   padding: 0.7rem 1.5rem;
 }
@@ -108,13 +108,13 @@ export default function Nav() {
   // Redirect to login if no user is logged in
   useEffect(() => {
     if (!currentUser) {
-      navigate("/");
+      navigate("/login");
     }
   }, [currentUser, navigate]);
 
   const handleLogout = () => {
     setUser(null); // Clear the current user
-    navigate("/"); // Redirect to login page
+    navigate("/login"); // Redirect to login page
   };
 
   const handleHamburger = () => setNavOpen(open => !open);

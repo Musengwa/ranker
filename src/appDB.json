@@ -2,9 +2,9 @@
   "users": [
     {
       "id": "1",
-      "name": "chiseko",
+      "name": "charlie",
       "details": "default",
-      "pfp": ".images/chloe_moretz_2014-2560x1440.jpg",
+      "pfp": "/images/chloe_moretz_2014-2560x1440.jpg",
       "email": "joe@gmail.com",
       "overAllAttributes": null
     },
@@ -12,7 +12,7 @@
       "id": "2",
       "name": "doe",
       "details": "default",
-      "pfp": ".images/chloe_moretz_sudden_attack_hd-1920x1080.jpg",
+      "pfp": "/images/chloe_moretz_sudden_attack_hd-1920x1080.jpg",
       "email": "joe@gmail.com",
       "overAllAttributes": null
     },
@@ -20,7 +20,7 @@
       "id": "3",
       "name": "alice",
       "details": "default",
-      "pfp": ".images/kendall_jenner_vogue_us_2016-1920x1080.jpg",
+      "pfp": "/images/kendall_jenner_vogue_us_2016-1920x1080.jpg",
       "email": "joe@gmail.com",
       "overAllAttributes": null
     },
@@ -28,7 +28,7 @@
       "id": "4",
       "name": "john",
       "details": "default",
-      "pfp": ".images/maisie_williams_nylon_magazine_2016-3840x2160.jpg",
+      "pfp": "/images/maisie_williams_nylon_magazine_2016-3840x2160.jpg",
       "email": "joe@gmail.com",
       "overAllAttributes": null
     }
@@ -248,7 +248,7 @@
             {
               "candidate": "john",
               "voters": [
-                "chiseko",
+                "charlie",
                 "doe",
                 "alice"
               ]
@@ -274,7 +274,9 @@
             },
             {
               "candidate": "doe",
-              "voters": []
+              "voters": [
+                "charlie"
+              ]
             }
           ]
         }
@@ -293,13 +295,13 @@
             {
               "candidate": "doe",
               "voters": [
-                "chiseko",
+                "charlie",
                 "alice",
                 "john"
               ]
             },
             {
-              "candidate": "chiseko",
+              "candidate": "charlie",
               "voters": [
                 "doe"
               ]
@@ -308,10 +310,10 @@
         },
         {
           "year": 2025,
-          "winner": "chiseko",
+          "winner": "charlie",
           "candidates": [
             {
-              "candidate": "chiseko",
+              "candidate": "charlie",
               "voters": [
                 "doe",
                 "alice",
@@ -324,9 +326,7 @@
             },
             {
               "candidate": "alice",
-              "voters": [
-                "chiseko"
-              ]
+              "voters": []
             },
             {
               "candidate": "doe",

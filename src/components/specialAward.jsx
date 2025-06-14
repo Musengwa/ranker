@@ -109,7 +109,7 @@ export default function SpecialAward({ award, onVoted }) {
                 await axios.put(`http://localhost:5000/awards/${award.id}`, thisAward);
             }
             setHasVoted(false);
-            setVotedCandidate(null);
+            setVotedCandidate(null); 
             if (onVoted) onVoted();
             fetchData();
         } catch (err) {
@@ -117,19 +117,20 @@ export default function SpecialAward({ award, onVoted }) {
         }
     };
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <div style={{color:"blue"}}>Loading...</div>;
     if (hasVoted && votedCandidate) {
         return (
-            <div>
-                <h3>You have already voted for this award.</h3>
-                <p>Your vote: <b>{votedCandidate.name}</b></p>
+            <div style={{backgroundColor:"rgb(245, 245, 245)", border: "1px solid grey", width: "85%", placeItems: "center", placeContent: "center",placeSelf: "center", borderRadius: 10, marginTop: 30, padding: 10}}>
+                <p>already voted.</p>
+                <p>this is your pick for <b>{award.name}</b> : <b>{votedCandidate.name}</b></p>
                 <img
                     src={votedCandidate.pfp || "/default-avatar.png"}
                     alt={`Portrait of ${votedCandidate.name}`}
                     width={64} height={64}
+                    style={{backgroundColor:"rgb(38, 38, 38)", border: "1px solid grey", borderRadius:40, padding: 10, width: 100, hieght: 100}}
                 />
                 <br />
-                <button onClick={handleVoteAgain} style={{marginTop: 12}}>Vote Again</button>
+                <button onClick={handleVoteAgain} style={{marginTop: 12 , placeSelf:"center", marginLeft: "20%", padding: 10, width: "60"}}>Vote Again</button>
             </div>
         );
     }
@@ -142,20 +143,21 @@ export default function SpecialAward({ award, onVoted }) {
     );
 
     return (
-        <section>
+        <section style={{background:"rgb(17, 17, 17)", color:"rgb(174, 174, 174)", margin: 15, padding: 10, borderRadius: 8}}>
             <article className="award">
                 <header className="award-details">
                     <h1>{award.name}</h1>
                     <p>{award.description}</p>
                 </header>
-                <section className="candidates">
                     <h2>Candidates</h2>
+                <section className="candidates" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr"}}>
                     {candidates.map(candidate => (
-                        <article className="candidate" key={candidate.id}>
+                        <article className="candidate" key={candidate.id} style={{backgroundColor:"rgb(19, 19, 19)", border: "1px solid grey", justifyItems: "center", margin: 10, padding: 5, borderRadius: 6}}>
                             <img 
                                 src={candidate.pfp || "/default-avatar.png"} 
-                                alt={`Portrait of ${candidate.name}`} 
-                                width={64} height={64}
+                                alt={`${candidate.name}`} 
+                                width={80} height={80}
+                                style={{backgroundColor:"rgb(0, 0, 0)", border: "1px solid grey", borderRadius:40, padding: 10, width: 70, height: 70}}
                             />
                             <div className="details">
                                 <h3>{candidate.name}</h3>
@@ -164,8 +166,9 @@ export default function SpecialAward({ award, onVoted }) {
                                 onClick={() => handleVote(candidate)}
                                 aria-label={`Vote for ${candidate.name} for ${award.name}`}
                                 disabled={hasVoted}
+                                style={{padding:7}}
                             >
-                                Vote for {candidate.name}
+                                pick me
                             </button>
                         </article>
                     ))}

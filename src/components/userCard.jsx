@@ -28,7 +28,7 @@ const userCardStyles = `
   width: 100%;
   color: grey;
 }
-.candidate-info h2 {
+.candidate-info h2, .detailss {
   color:rgb(210, 210, 214);
   font-size: 1.8rem;
   font-weight: 200;
@@ -275,8 +275,15 @@ const toInt = (val) => {
             <header className="candidate-info" key={candidate.id}>
                 <h2>{candidate.name}</h2>
             </header>
-            <div className="userimg"><img alt="#" src= {candidate.pfp} /></div>
-            <div>short statement from user</div>
+            <div className="userimg">
+              <img
+                alt={candidate.name}
+                src={candidate.pfp && candidate.pfp.startsWith("/") ? candidate.pfp : `/images/default-avatar.jpg`}
+                onError={e => { e.target.onerror = null; e.target.src = "/images/default-avatar.jpg"; }}
+                style={{ width: 100, height: 100, borderRadius: "50%" }}
+              /> 
+            </div>
+            <p className="detailss">{candidate.details}</p>
           </div>            
             <form
   className="attributes"
