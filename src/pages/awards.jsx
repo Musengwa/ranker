@@ -25,11 +25,13 @@ export default function Awards() {
             </Helmet>
             <Nav />
             <nav className="awardNav" aria-label="Awards Navigation">
-                <ul>
+                <ul style={{ listStyleType: "none", padding: 10,marginTop: 40, margin: 5, display: "flex", flexDirection: "row", gap: 10, flexWrap: "wrap", justifyContent: "space-between" }}>
                     {awards.map(award => (
-                        <li key={award.id}>
-                            <button onClick={() => setSelectedAward(award)}>
-                                {award.name}
+                        <li key={award.id} style={{height: 140, width: "95%", background: "linear-gradient(90deg,rgba(133, 12, 12, 0.99) 0%, rgb(198, 10, 10) 50%,rgb(135, 7, 7) 100%)", border: "1px solid rgb(96, 77, 77)", padding: 5, margin: 5, borderRadius: 8}} >
+                            <h3>{award.name}</h3>
+                            <p>{award.description}</p>
+                            <button onClick={() => setSelectedAward(award)} style={{backgroundColor:"whitesmoke", border: "2px solid black", padding: 10, justifyContent: "right"}}>
+                                vote now!!!
                             </button>
                         </li>
                     ))}

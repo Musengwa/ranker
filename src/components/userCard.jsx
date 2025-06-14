@@ -5,9 +5,10 @@ import axios from "axios";
 // --- Modern, Fun, Responsive CSS for UserCard ---
 const userCardStyles = `
 .card {
-  background: linear-gradient(120deg,rgb(245, 243, 249) 0%,rgb(224, 228, 242) 100%);
+  background-color: rgb(19, 19, 19);
+  border: 2px solid rgb(40, 40, 40);
   border-radius: 1.5rem;
-  box-shadow: 0 4px 24px #6366f122;
+  box-shadow: 0 4px 24pxrgba(99, 101, 241, 0.06);
   padding: 2rem 1.5rem 1.5rem 1.5rem;
   margin: 2rem auto;
   width: 90%;
@@ -18,20 +19,22 @@ const userCardStyles = `
   transition: box-shadow 0.18s, transform 0.18s;
 }
 .card:hover {
-  box-shadow: 0 8px 32px #6366f144;
+  box-shadow: 0 8px 32pxrgba(99, 165, 241, 0.07);
   transform: translateY(-2px) scale(1.01);
 }
 .candidate-info {
   text-align: center;
   margin-bottom: 1.2rem;
   width: 100%;
+  color: grey;
 }
-.candidate-info h2 {
-  color: #6366f1;
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-  letter-spacing: 1px;
+.candidate-info h2, .detailss {
+  color:rgb(210, 210, 214);
+  font-size: 1.8rem;
+  font-weight: 200;
+  margin-left: 10px;
+  letter-spacing: 1.5px;
+  text-align: center;
 }
 .attributes {
   display: grid;
@@ -47,8 +50,8 @@ const userCardStyles = `
 
 .label-input {
   width: 50%;
-  display: fle;
-  flex-direction: column;x
+  display: flex;
+  flex-direction: column;
   align-items: center;
   position: relative;
   margin-bottom: 0.7rem;
@@ -64,8 +67,8 @@ const userCardStyles = `
   gap: 0.5rem;
 }
 .attributes label {
-  font-weight: 600;
-  color: #4f46e5;
+  font-weight: 200;
+  color:rgb(165, 164, 186);
   font-size: 1rem;
   cursor: pointer;
   text-align: right;
@@ -77,20 +80,20 @@ const userCardStyles = `
   min-width: 60px;
   max-width: 90px;
   padding: 0.4rem 0.5rem;
-  border: 1.5px solid #a5b4fc;
+  border: solid 1.5px rgb(117, 117, 117)
   border-radius: 0.7rem;
   font-size: 1rem;
   margin-bottom: 0;
-  background: #fff;
-  color: #334155;
+  background:rgb(33, 33, 33);
+  color:rgb(216, 216, 216);
   transition: border 0.18s;
   text-align: center;
   display: inline-block;
 }
 .attributes input[type="text"]:focus {
-  border: 2px solid #6366f1;
+  border: 2px solidrgb(138, 138, 138);
   outline: none;
-  background: #f0f9ff;
+  background:rgb(13, 13, 13);
 }
 .attributes small {
   color: #64748b;
@@ -99,7 +102,8 @@ const userCardStyles = `
 }
 .submit {
   margin-top: 1.2rem;
-  background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+  margin-left: 2rem;
+  background: linear-gradient(90deg,rgb(82, 128, 227) 0%,rgb(5, 73, 200) 100%);
   color: #fff;
   border: none;
   border-radius: 2rem;
@@ -107,14 +111,16 @@ const userCardStyles = `
   font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 8px #6366f133;
+  box-shadow: 0 2px 8pxrgba(99, 99, 241, 0.13);
   transition: background 0.18s, transform 0.12s;
   align-self: center;
+  justify-self: center;
+
   width: 90%;
   max-width: 320px;
 }
 .submit:hover, .submit:focus {
-  background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%);
+  background: linear-gradient(90deg,rgb(14, 65, 250) 0%,rgb(48, 83, 209) 100%);
   transform: scale(1.04);
   outline: none;
 }
@@ -155,12 +161,12 @@ border: solid white 1.5px;
   min-width: 40px;
   max-width: 60px;
   padding: 1rem 1rem;
-  border: 1.5px solid #a5b4fc;
-  border-radius: 0.7rem;
+  border: solid 1.5px rgb(117, 117, 117);
+  border-radius: 0.8rem;
   font-size: 1rem;
   margin-bottom: 0;
-  background: #fff;
-  color: #334155;
+  background:rgb(17, 17, 17);
+  color:rgb(174, 174, 174);
   transition: border 0.18s;
   text-align: center;
   display: inline-block;
@@ -269,8 +275,15 @@ const toInt = (val) => {
             <header className="candidate-info" key={candidate.id}>
                 <h2>{candidate.name}</h2>
             </header>
-            <div className="userimg"><img alt="#" src= {candidate.pfp} /></div>
-            <div>short statement from user</div>
+            <div className="userimg">
+              <img
+                alt={candidate.name}
+                src={candidate.pfp && candidate.pfp.startsWith("/") ? candidate.pfp : `/images/default-avatar.jpg`}
+                onError={e => { e.target.onerror = null; e.target.src = "/images/default-avatar.jpg"; }}
+                style={{ width: 100, height: 100, borderRadius: "50%" }}
+              /> 
+            </div>
+            <p className="detailss">{candidate.details}</p>
           </div>            
             <form
   className="attributes"
