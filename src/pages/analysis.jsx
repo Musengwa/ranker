@@ -4,11 +4,15 @@
 //the average should be an array in an object with the year attached to it
 //use a graph comparing the individual attributes of each user
 //this should only be viewed by on user, preset in the code, we'll call him the moderater.
+//awardAnalysis.jsx
 
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Nav from "../components/nav";
 import { Helmet } from "react-helmet";
+import Pie from "../components/graph";
+import AwardAnalysis from "../components/awardAnalysis";
+
 
 // --- Modern CSS for Analysis Page ---
 const analysisStyles = `
@@ -145,7 +149,7 @@ export default function GrantAnalysis() {
     // Helper: Get candidates with at least one vote for a given award/year
     const getAwardResults = (award) => {
         // Only use years that are not 2025 (remove dummy data for 2025)
-        const validYears = award.years.filter(y => y.year !== 2025);
+        const validYears = award.years.filter(y => y.year === 2025);
         return validYears.map(yearObj => {
             // Only candidates with at least one vote
             const candidatesWithVotes = yearObj.candidates
@@ -164,6 +168,7 @@ export default function GrantAnalysis() {
                 year: yearObj.year,
                 candidates: candidatesWithVotes,
                 winners
+                
             };
         });
     };
@@ -198,7 +203,7 @@ export default function GrantAnalysis() {
             <table className="analysis-table">
                 <thead>
                     <tr>
-                        <th>Voter ID</th>
+                        <th>Voter ID</th> 
                         {attributeNames.map(attr => (
                             <th key={attr}>{attr}</th>
                         ))}
@@ -253,15 +258,22 @@ export default function GrantAnalysis() {
         );
     };
 
+    const testdata = [
+        { id: 0, value: 20, label: 'Occupied', color: '#dc2626' },
+        { id: 1, value: 50, label: 'Available', color: '#2563eb' },
+        { id: 2, value: 15, label: 'Reserved', color: '#f59e42' },
+    ];
     return (
+        <>
+        <Nav/>
         <div className="analysis-container">
-        <Nav />
             <Helmet>
                 <title>Analysis | Ranker</title>
                 <meta name="description" content="Moderator analysis of candidate votes and attributes." />
             </Helmet>
             <section className="analysis-section">
                 <h1>Award Results</h1>
+                <Pie data={testdata} title={"test pie"} />
                 {awards.map(award => (
                     <div key={award.id} style={{marginBottom: "2rem"}}>
                         <h2 style={{color:"#fbbf24"}}>{award.name}</h2>
@@ -308,5 +320,8 @@ export default function GrantAnalysis() {
                     })}
             </section>
         </div>
+        <AwardAnalysis award_id= "award-1"/>
+        
+        </>
     );
 }

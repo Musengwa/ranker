@@ -9,6 +9,7 @@ import { UserContextProvider } from "./context/currentUserContext";
 
 function App() {
   return (
+    <div className="app">
     <UserContextProvider>
       <Routes>
         <Route path="/login" element={<Auth />} />
@@ -18,6 +19,7 @@ function App() {
         <Route path="/awards" element={<Awards />} />
       </Routes>
     </UserContextProvider>
+    </div>
   );
 }
 

@@ -68,7 +68,32 @@
     {
       "candidateID": "2",
       "voterID": "1",
-      "attributes": [],
+      "attributes": [
+        {
+          "name": "1",
+          "value": 12
+        },
+        {
+          "name": "2",
+          "value": 6
+        },
+        {
+          "name": "3",
+          "value": 99
+        },
+        {
+          "name": "4",
+          "value": 36
+        },
+        {
+          "name": "5",
+          "value": 0
+        },
+        {
+          "name": "6",
+          "value": 7
+        }
+      ],
       "id": "e176"
     },
     {
@@ -274,9 +299,7 @@
             },
             {
               "candidate": "doe",
-              "voters": [
-                "charlie"
-              ]
+              "voters": []
             }
           ]
         }

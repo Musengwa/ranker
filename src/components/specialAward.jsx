@@ -120,14 +120,14 @@ export default function SpecialAward({ award, onVoted }) {
     if (loading) return <div style={{color:"blue"}}>Loading...</div>;
     if (hasVoted && votedCandidate) {
         return (
-            <div style={{backgroundColor:"rgb(245, 245, 245)", border: "1px solid grey", width: "85%", placeItems: "center", placeContent: "center",placeSelf: "center", borderRadius: 10, marginTop: 30, padding: 10}}>
+            <div style={{backgroundColor:"rgba(18, 19, 19, 1)", border: "1px solid grey", width: "85%", placeItems: "center", placeContent: "center",placeSelf: "center", borderRadius: 10, marginTop: 30, padding: 10}}>
                 <p>already voted.</p>
                 <p>this is your pick for <b>{award.name}</b> : <b>{votedCandidate.name}</b></p>
                 <img
                     src={votedCandidate.pfp || "/default-avatar.png"}
                     alt={`Portrait of ${votedCandidate.name}`}
-                    width={64} height={64}
-                    style={{backgroundColor:"rgb(38, 38, 38)", border: "1px solid grey", borderRadius:40, padding: 10, width: 100, hieght: 100}}
+                    width= '40%' height='100%'
+                    style={{backgroundColor:"rgb(38, 38, 38)", border: "1px solid rgba(73, 72, 72, 1)", borderRadius:40, padding: 0, width: 350, height: 300}}
                 />
                 <br />
                 <button onClick={handleVoteAgain} style={{marginTop: 12 , placeSelf:"center", marginLeft: "20%", padding: 10, width: "60"}}>Vote Again</button>
@@ -150,15 +150,10 @@ export default function SpecialAward({ award, onVoted }) {
                     <p>{award.description}</p>
                 </header>
                     <h2>Candidates</h2>
-                <section className="candidates" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr"}}>
+                <section className="candidates" style={{ display: "flex", flexWrap: "wrap", flexDirection: "row"}}>
                     {candidates.map(candidate => (
-                        <article className="candidate" key={candidate.id} style={{backgroundColor:"rgb(19, 19, 19)", border: "1px solid grey", justifyItems: "center", margin: 10, padding: 5, borderRadius: 6}}>
-                            <img 
-                                src={candidate.pfp || "/default-avatar.png"} 
-                                alt={`${candidate.name}`} 
-                                width={80} height={80}
-                                style={{backgroundColor:"rgb(0, 0, 0)", border: "1px solid grey", borderRadius:40, padding: 10, width: 70, height: 70}}
-                            />
+                        <article className="candidate" key={candidate.id} style={{backgroundColor:"rgb(19, 19, 19)", backgroundImage: `url(${candidate.pfp || '/images/default-avatar.jpg'})` , border: "1px solid grey", justifyItems: "center", margin: 5, marginBottom: 15, padding: 5, borderRadius: 16, width: 180, height: 280}}>
+                
                             <div className="details">
                                 <h3>{candidate.name}</h3>
                             </div>
@@ -166,7 +161,7 @@ export default function SpecialAward({ award, onVoted }) {
                                 onClick={() => handleVote(candidate)}
                                 aria-label={`Vote for ${candidate.name} for ${award.name}`}
                                 disabled={hasVoted}
-                                style={{padding:7}}
+                                style={{padding:7, borderRadius: 5}}
                             >
                                 pick me
                             </button>

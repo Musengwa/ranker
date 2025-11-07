@@ -32,13 +32,13 @@ export default function Vote() {
     }, [fetchUsers]);
 
     return (
-        <div style={{backgroundColor: "black"}}>
+        <>
+            <Nav/>
             <Helmet>
                 <title>Rank Candidates | Voting Page</title>
                 <meta name="description" content="Vote and rank candidates on the Ranker platform." />
                 <meta name="keywords" content="voting, ranker, candidates, user ranking" />
             </Helmet>
-            <Nav/>
             <h1 style={{color: "ghostwhite", fontSize: 30, fontWeight:300, padding: 7, marginLeft: 30 }}>rank</h1>
             <div className="candidates">
                 {candidates.map(candidate => (
@@ -49,6 +49,6 @@ export default function Vote() {
                     />
                 ))}
             </div>
-        </div>
+        </>
     );
 }

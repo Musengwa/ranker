@@ -18,19 +18,19 @@ export default function Awards() {
 
     return (
         <>
+        <Nav />
             <Helmet>
                 <title>Awards | Ranker</title>
                 <meta name="description" content="Vote for your favorite awards on Ranker. Discover nominees and winners in various categories." />
                 <meta name="keywords" content="awards, voting, ranker, nominees, winners" />
             </Helmet>
-            <Nav />
             <nav className="awardNav" aria-label="Awards Navigation">
-                <ul style={{ listStyleType: "none", padding: 10,marginTop: 40, margin: 5, display: "flex", flexDirection: "row", gap: 10, flexWrap: "wrap", justifyContent: "space-between" }}>
+                <ul style={{ listStyleType: "none", padding: 15,marginTop: 40, margin: 2, display: "flex", flexDirection: "row", gap: 2, flexWrap: "wrap", justifyContent: "space-between" }}>
                     {awards.map(award => (
-                        <li key={award.id} style={{height: 140, width: "95%", background: "linear-gradient(90deg,rgba(133, 12, 12, 0.99) 0%, rgb(198, 10, 10) 50%,rgb(135, 7, 7) 100%)", border: "1px solid rgb(96, 77, 77)", padding: 5, margin: 5, borderRadius: 8}} >
-                            <h3>{award.name}</h3>
-                            <p>{award.description}</p>
-                            <button onClick={() => setSelectedAward(award)} style={{backgroundColor:"whitesmoke", border: "2px solid black", padding: 10, justifyContent: "right"}}>
+                        <li key={award.id} style={{height: 170, width: "47%", background: "linear-gradient(90deg,rgba(12, 50, 133, 0.99) 0%, rgba(9, 59, 100, 1) 50%,rgba(9, 46, 149, 1) 100%)", border: "1px solid rgba(66, 66, 66, 1)", paddingBottom: 30, paddingRight: 20, paddingLeft: 20, margin: 3, borderRadius: 8}} >
+                            <h3 style ={{color: "whitesmoke"}}>{award.name}</h3>
+                            <p style ={{color: "whitesmoke"}}>{award.description}</p>
+                            <button onClick={() => setSelectedAward(award)} style={{color:"whitesmoke", backgroundColor:"black", border: "2px solid grey", padding: 15, justifyContent: "right", borderRadius: 4, alignSelf: 'center'}}>
                                 vote now!!!
                             </button>
                         </li>
