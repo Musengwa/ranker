@@ -345,7 +345,9 @@
             },
             {
               "candidate": "john",
-              "voters": []
+              "voters": [
+                "charlie"
+              ]
             },
             {
               "candidate": "alice",

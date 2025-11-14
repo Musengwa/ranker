@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import MyPie from "./graph";
+//import MyPie from "./graph";
 
 export default function AwardAnalysis({ award_id }) {
-  const [graphData, setGraphData] = useState([]);
-  const colors = ["blue", "green", "red", "orange", "yellow", "purple", "grey"];
+ // const [graphData, setGraphData] = useState([]);
+ // const colors = ["blue", "green", "red", "orange", "yellow", "purple", "grey"];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,7 +19,7 @@ export default function AwardAnalysis({ award_id }) {
           );
 
           // Transform candidates into pie chart data
-          const pieData = latestYear.candidates
+          /**const pieData = latestYear.candidates
             .filter(candidate => candidate.voters.length > 0)
             .map((candidate, index) => ({
               id: candidate.candidate,
@@ -28,7 +28,7 @@ export default function AwardAnalysis({ award_id }) {
               color: colors[index % colors.length]
             }));
 
-          setGraphData(pieData);
+          setGraphData(pieData);  */
         }
       } catch (error) {
         console.error("Error fetching awards:", error);
@@ -40,7 +40,7 @@ export default function AwardAnalysis({ award_id }) {
 
   return (
     <div>
-      <MyPie data={graphData} title={award_id} />
+      {/**<MyPie data={graphData} title={award_id} />**/}
     </div>
   );
 }

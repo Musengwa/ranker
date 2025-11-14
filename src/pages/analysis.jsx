@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Nav from "../components/nav";
 import { Helmet } from "react-helmet";
-import Pie from "../components/graph";
+//import Pie from "../components/graph";
 import AwardAnalysis from "../components/awardAnalysis";
 
 
@@ -258,11 +258,11 @@ export default function GrantAnalysis() {
         );
     };
 
-    const testdata = [
+    /**const testdata = [
         { id: 0, value: 20, label: 'Occupied', color: '#dc2626' },
         { id: 1, value: 50, label: 'Available', color: '#2563eb' },
         { id: 2, value: 15, label: 'Reserved', color: '#f59e42' },
-    ];
+    ];*/
     return (
         <>
         <Nav/>
@@ -273,7 +273,7 @@ export default function GrantAnalysis() {
             </Helmet>
             <section className="analysis-section">
                 <h1>Award Results</h1>
-                <Pie data={testdata} title={"test pie"} />
+                {/**<Pie data={testdata} title={"test pie"} /> */}
                 {awards.map(award => (
                     <div key={award.id} style={{marginBottom: "2rem"}}>
                         <h2 style={{color:"#fbbf24"}}>{award.name}</h2>
