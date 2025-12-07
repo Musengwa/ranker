@@ -12,6 +12,7 @@ import Nav from "../components/nav";
 import { Helmet } from "react-helmet";
 //import Pie from "../components/graph";
 import AwardAnalysis from "../components/awardAnalysis";
+import FutPlayerCard from "../components/fc_card";
 
 
 // --- Modern CSS for Analysis Page ---
@@ -59,7 +60,7 @@ const analysisStyles = `
   letter-spacing: 1px;
 }
 .analysis-table {
-  width: 95%;
+  width: 50%;
   border-collapse: collapse;
   margin: 1.2rem 0 2rem 0;
   background: #18181b;
@@ -121,10 +122,10 @@ const analysisStyles = `
 
 // Inject the CSS into the document head
 if (typeof document !== "undefined" && !document.getElementById("ranker-analysis-css")) {
-  const style = document.createElement("style");
-  style.id = "ranker-analysis-css";
-  style.innerHTML = analysisStyles;
-  document.head.appendChild(style);
+    const style = document.createElement("style");
+    style.id = "ranker-analysis-css";
+    style.innerHTML = analysisStyles;
+    document.head.appendChild(style);
 }
 
 export default function GrantAnalysis() {
@@ -168,7 +169,7 @@ export default function GrantAnalysis() {
                 year: yearObj.year,
                 candidates: candidatesWithVotes,
                 winners
-                
+
             };
         });
     };
@@ -203,7 +204,7 @@ export default function GrantAnalysis() {
             <table className="analysis-table">
                 <thead>
                     <tr>
-                        <th>Voter ID</th> 
+                        <th>Voter ID</th>
                         {attributeNames.map(attr => (
                             <th key={attr}>{attr}</th>
                         ))}
@@ -265,63 +266,79 @@ export default function GrantAnalysis() {
     ];*/
     return (
         <>
-        <Nav/>
-        <div className="analysis-container">
-            <Helmet>
-                <title>Analysis | Ranker</title>
-                <meta name="description" content="Moderator analysis of candidate votes and attributes." />
-            </Helmet>
-            <section className="analysis-section">
-                <h1>Award Results</h1>
-                {/**<Pie data={testdata} title={"test pie"} /> */}
-                {awards.map(award => (
-                    <div key={award.id} style={{marginBottom: "2rem"}}>
-                        <h2 style={{color:"#fbbf24"}}>{award.name}</h2>
-                        {getAwardResults(award).map(result => (
-                            <div key={result.year} style={{marginBottom: "1rem"}}>
-                                <strong style={{color:"#60a5fa"}}>Year: {result.year}</strong>
-                                <ul>
-                                    {result.candidates.map(c => (
-                                        <li key={c.name}>
-                                            {c.name} — {c.votes} vote{c.votes !== 1 ? "s" : ""}
-                                            {result.winners.some(w => w.name === c.name) && c.votes > 0 && (
-                                                <span style={{color: "#3b82f6", fontWeight: 600, marginLeft: 8}}>
-                                                    Winner
-                                                </span>
-                                            )}
-                                        </li>
-                                    ))}
-                                    {result.candidates.length === 0 && (
-                                        <li style={{color: "#64748b"}}>No votes cast for this award.</li>
+            <Nav />
+            <div className="analysis-container">
+                <Helmet>
+                    <title>Analysis | Ranker</title>
+                    <meta name="description" content="Moderator analysis of candidate votes and attributes." />
+                </Helmet>
+                <section className="analysis-section">
+                    <h1>Award Results</h1>
+                    {/**<Pie data={testdata} title={"test pie"} /> */}
+                    {awards.map(award => (
+                        <div key={award.id} style={{ marginBottom: "2rem" }}>
+                            <h2 style={{ color: "#fbbf24" }}>{award.name}</h2>
+                            {getAwardResults(award).map(result => (
+                                <div key={result.year} style={{ marginBottom: "1rem" }}>
+                                    <strong style={{ color: "#60a5fa" }}>Year: {result.year}</strong>
+                                    <ul>
+                                        {result.candidates.map(c => (
+                                            <li key={c.name}>
+                                                {c.name} — {c.votes} vote{c.votes !== 1 ? "s" : ""}
+                                                {result.winners.some(w => w.name === c.name) && c.votes > 0 && (
+                                                    <span style={{ color: "#3b82f6", fontWeight: 600, marginLeft: 8 }}>
+                                                        Winner
+                                                    </span>
+                                                )}
+                                            </li>
+                                        ))}
+                                        {result.candidates.length === 0 && (
+                                            <li style={{ color: "#64748b" }}>No votes cast for this award.</li>
+                                        )}
+                                    </ul>
+                                    {result.winners.length > 1 && result.winners.length === result.candidates.length && (
+                                        <div style={{ color: "#fbbf24" }}>All candidates tied!</div>
                                     )}
-                                </ul>
-                                {result.winners.length > 1 && result.winners.length === result.candidates.length && (
-                                    <div style={{color: "#fbbf24"}}>All candidates tied!</div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                ))}
-            </section>
-            <section className="analysis-section">
-                <h1>Candidate Votes</h1>
-                {/* Only show candidates with at least one vote */}
-                {[...new Set(allVotes.map(v => v.candidateID))]
-                    .map(candidateID => {
-                        const votesForCandidate = allVotes.filter(v => v.candidateID === candidateID);
-                        if (votesForCandidate.length === 0) return null;
-                        return (
-                            <PerCandidate
-                                key={candidateID}
-                                allVotes={allVotes}
-                                candidate={candidateID}
-                            />
-                        );
-                    })}
-            </section>
-        </div>
-        <AwardAnalysis award_id= "award-1"/>
-        
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </section>
+                <section className="analysis-section">
+                    <h1>Candidate Votes</h1>
+                    {/* Only show candidates with at least one vote */}
+                    {[...new Set(allVotes.map(v => v.candidateID))]
+                        .map(candidateID => {
+                            const votesForCandidate = allVotes.filter(v => v.candidateID === candidateID);
+                            if (votesForCandidate.length === 0) return null;
+                            return (
+                                <PerCandidate
+                                    key={candidateID}
+                                    allVotes={allVotes}
+                                    candidate={candidateID}
+                                />
+                            );
+                        })}
+                </section>
+            </div>
+            <AwardAnalysis award_id="award-1" />
+
+            <FutPlayerCard
+                rating={96}
+                position="CF"
+                nation="argentina.png"
+                club="manchester_united.png"
+                playerImage="mh.png"
+                skill={5}
+                weakFoot={4}
+                name="Musengwa Himoonga"
+                pac={90}
+                sho={93}
+                pas={82}
+                dri={88}
+                def={35}
+                phy={78}
+            />
         </>
     );
 }

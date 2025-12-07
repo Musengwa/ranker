@@ -10,7 +10,6 @@ import {
   FiBarChart2, FiList, FiStar, FiShare2,
   FiUsers, FiThumbsUp, FiActivity, FiTrendingUp, FiTarget
 } from "react-icons/fi";
-//import FutPlayerCard from "../components/fc_card";
 
 // --- Modern Dark Dashboard CSS ---
 const dashStyles = `
@@ -566,6 +565,7 @@ const VotedAwardsSection = ({ awards, users, currentUser, onVoteAgain }) => {
         <FiAward size={26} />
         <h2>2025 Awards</h2>
       </div>
+
       <div className="awards-grid">
         {awards.map(award => {
           const yearObj = award.years.find(y => y.year === currentYear);

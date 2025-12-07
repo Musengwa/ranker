@@ -3,7 +3,6 @@ import SpecialAward from "../components/specialAward";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Helmet } from "react-helmet"; // Add this import
-import FutPlayerCard from "../components/fc_card";
 
 export default function Awards() {
     const [awards, setAwards] = useState([]);
@@ -25,22 +24,6 @@ export default function Awards() {
                 <meta name="description" content="Vote for your favorite awards on Ranker. Discover nominees and winners in various categories." />
                 <meta name="keywords" content="awards, voting, ranker, nominees, winners" />
             </Helmet>
-            <FutPlayerCard
-                rating={96}
-                position="CF"
-                nation="portugal.png"
-                club="manchester_united.png"
-                playerImage="ronaldo.png"
-                skills={5}
-                weakFoot={4}
-                name="RONALDO"
-                pac={90}
-                sho={93}
-                pas={82}
-                dri={88}
-                def={35}
-                phy={78}
-            />
             <nav className="awardNav" aria-label="Awards Navigation">
                 <ul style={{ listStyleType: "none", padding: 15, marginTop: 40, margin: 2, display: "flex", flexDirection: "row", gap: 2, flexWrap: "wrap", justifyContent: "space-between" }}>
                     {awards.map(award => (

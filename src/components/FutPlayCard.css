@@ -7,11 +7,11 @@
 body {
   font-family: "Saira Semi Condensed", sans-serif;
   font-weight: 400;
-  background: url("/images/background-image") no-repeat center center/cover;
+  background-color: #111;
 }
 
 body:after {
-  content: "@selimdoyranli";
+  content: "pobo";
   font-size: 1rem;
   color: #aaa;
   position: fixed;
@@ -35,7 +35,7 @@ body:after {
   position: relative;
   width: 300px;
   height: 485px;
-  background-image: url("/images/card_bg.png");
+  background-image: url("/public/images/card_bg.png");
   background-position: center center;
   background-size: 100% 100%;
   background-repeat: no-repeat;
@@ -47,7 +47,7 @@ body:after {
 .fut-player-card .player-card-top {
   position: relative;
   display: flex;
-  color: #e9cc74;
+  color: #f5eafd;
   padding: 0 1.5rem;
 }
 
@@ -135,7 +135,7 @@ body:after {
 .fut-player-card .player-card-bottom .player-info {
   display: block;
   padding: 0.3rem 0;
-  color: #e9cc74;
+  color: #bc57eb;
   width: 90%;
   margin: 0 auto;
   height: auto;
@@ -147,7 +147,7 @@ body:after {
   width: 100%;
   display: block;
   text-align: center;
-  font-size: 1.6rem;
+  font-size: 1.2rem;
   text-transform: uppercase;
   border-bottom: 2px solid rgba(233, 204, 116, 0.1);
   padding-bottom: 0.3rem;
@@ -179,6 +179,7 @@ body:after {
 .fut-player-card .player-card-bottom .player-info .player-features .player-features-col span .player-feature-value {
   margin-right: 0.3rem;
   font-weight: 700;
+  color: #e5d5ec;
 }
 
 .fut-player-card .player-card-bottom .player-info .player-features .player-features-col span .player-feature-title {

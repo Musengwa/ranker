@@ -1,5 +1,5 @@
 import React from 'react';
-import './FutPlayerCard.css'; // We'll extract the CSS to a separate file
+import './FutPlayCard.css'; // We'll extract the CSS to a separate file
 
 const FutPlayerCard = ({
   rating = 97,
