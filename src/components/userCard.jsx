@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import axios from "axios";
 import { FiUser, FiStar, FiInfo, FiCheckCircle, FiX } from "react-icons/fi";
+import supabase from "../config/supabaseClients";
 
 // --- Dark Glass UserCard with Background Image ---
 const userCardStyles = `
@@ -164,21 +164,102 @@ if (typeof document !== "undefined" && !document.getElementById("ranker-usercard
   document.head.appendChild(style);
 }
 
+// helper: parse a max value from attribute details when possible, fallback to default
+const parseMaxFromAttr = (attr) => {
+  if (!attr) return 20;
+  // if there's an explicit `max` field use it
+  if (typeof attr.max === "number") return attr.max;
+  // try to find "0-20", "0 to 20", "max 20" patterns in details
+  const d = String(attr.details || "");
+  const rangeMatch = d.match(/(\d{1,3})\s*(?:-|to)\s*(\d{1,3})/i);
+  if (rangeMatch) return parseInt(rangeMatch[2], 10);
+  const maxMatch = d.match(/max[:\s]*?(\d{1,3})/i);
+  if (maxMatch) return parseInt(maxMatch[1], 10);
+  // safe default
+  return 20;
+};
+
+// convert and clamp to integer in [min, max]
+const toIntClamped = (val, min = 0, max = 100) => {
+  const num = parseInt(val, 10);
+  if (isNaN(num)) return min;
+  if (num < min) return min;
+  if (num > max) return max;
+  return num;
+};
+
 export default function UserCard({ candidate, voter }) {
   const [attributeValues, setAttributeValues] = useState({});
   const [attributes, setAttributes] = useState([]);
   const [openDetail, setOpenDetail] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [existingVoteId, setExistingVoteId] = useState(null);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/attribute")
-      .then(response => setAttributes(response.data))
-      .catch(error => console.error("Error fetching attributes:", error));
-  }, []);
+    // load attributes and any existing vote for this voter+candidate for the current year
+    const load = async () => {
+      try {
+        // 1. load attribute definitions
+        const { data: attrData, error: attrErr } = await supabase
+          .from("attributes")
+          .select("*")
+          .order("id", { ascending: true });
+
+        if (attrErr) {
+          console.error("Error fetching attributes:", attrErr);
+        } else {
+          setAttributes(attrData || []);
+        }
+
+        // 2. if we have a voter and candidate, try to load an existing vote row
+        if (!voter || !voter.id || !candidate || !candidate.id) return;
+
+        const currentYear = new Date().getFullYear();
+
+        const { data: voteRow, error: voteErr } = await supabase
+          .from("votes")
+          .select("*")
+          .eq("candidateid", candidate.id)
+          .eq("voterid", voter.id)
+          .eq("year", currentYear)
+          .eq("groupid", 1)  // hardcoded groupid
+          .maybeSingle();
+
+        if (voteErr) {
+          console.error("Error fetching vote row:", voteErr);
+        } else if (voteRow) {
+          setExistingVoteId(voteRow.id);
+
+          // fetch attribute values for that vote
+          const { data: valData, error: valErr } = await supabase
+            .from("vote_attribute_values")
+            .select("*")
+            .eq("voteid", voteRow.id);
+
+          if (valErr) {
+            console.error("Error fetching vote attribute values:", valErr);
+          } else if (valData) {
+            // map to attributeValues state (use string keys for safety)
+            const mapping = {};
+            valData.forEach(vav => {
+              mapping[String(vav.attributeid)] = vav.value;
+            });
+            setAttributeValues(mapping);
+          }
+        }
+      } catch (err) {
+        console.error("Unexpected error loading user card data:", err);
+      }
+    };
+
+    load();
+    // only re-run when candidate or voter changes
+  }, [candidate?.id, voter?.id]);
 
   const handleAttributeChange = (id, value) => {
     setAttributeValues(prev => ({
       ...prev,
-      [id]: value,
+      [String(id)]: value,
     }));
   };
 
@@ -187,45 +268,96 @@ export default function UserCard({ candidate, voter }) {
     return isNaN(num) ? 0 : num;
   };
 
-  const handleAttributesValues = async () => {
+  const handleAttributesValues = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!voter || !voter.id || !candidate || !candidate.id) {
+      alert("Missing voter or candidate information.");
+      return;
+    }
+
+    setLoading(true);
     try {
-      const existingVoteResponse = await axios.get("http://localhost:5000/userXvotes", {
-        params: {
-          candidateID: candidate.id,
-          voterID: voter.id,
-        }, 
-      });
-      const existingVote = existingVoteResponse.data[0];
-      const payload = {
-        candidateID: candidate.id,
-        voterID: voter.id,
-        attributes: Object.entries(attributeValues).map(([id, value]) => {
-          const attr = attributes.find(a => a.id === id);
-          return {
-            name: attr ? attr.name : id,
-            value: toInt(value),
-          };
-        }),
-      };
-      if (existingVote) {
-        await axios.put(`http://localhost:5000/userXvotes/${existingVote.id}`, payload);
-        alert("Vote updated successfully!");
+      const currentYear = new Date().getFullYear();
+
+      // 1) ensure there is a votes row for this voter/candidate/year
+      let voteId = existingVoteId;
+
+      if (!voteId) {
+        // Insert a new vote row
+        const { data: inserted, error: insertErr } = await supabase
+          .from("votes")
+          .insert([{
+            candidateid: candidate.id,
+            voterid: voter.id,
+            year: currentYear,
+            groupid: 1,  // hardcoded groupid
+          }])
+          .select()
+          .single();
+
+        if (insertErr) {
+          throw insertErr;
+        }
+        voteId = inserted.id;
+        setExistingVoteId(voteId);
       } else {
-        await axios.post("http://localhost:5000/userXvotes", payload);
-        alert("Vote submitted successfully!");
+        // Optionally update updated_at or other metadata on existing vote
+        await supabase
+          .from("votes")
+          .update({ /* optionally add fields */ })
+          .eq("id", voteId);
       }
+
+      // 2) replace existing vote_attribute_values for this vote with current values
+      // Delete any existing attribute rows for this vote, then insert the current set.
+      const { error: delErr } = await supabase
+        .from("vote_attribute_values")
+        .delete()
+        .eq("voteid", voteId);
+
+      if (delErr) {
+        console.error("Error deleting old attribute values:", delErr);
+        // not fatal — we'll still attempt inserts
+      }
+
+      // Prepare insert array
+      const toInsert = attributes.map(attr => {
+        const key = String(attr.id);
+        const rawVal = attributeValues[key];
+        return {
+          voteid: voteId,
+          attributeid: attr.id,
+          value: toInt(rawVal),
+        };
+      });
+
+      if (toInsert.length > 0) {
+        const { error: insertValsErr } = await supabase
+          .from("vote_attribute_values")
+          .insert(toInsert);
+
+        if (insertValsErr) {
+          throw insertValsErr;
+        }
+      }
+
+      // Optionally, you may want to create a record in vote_award_values here where appropriate
+      alert("Vote saved successfully!");
     } catch (error) {
       console.error("Error submitting or updating vote:", error);
+      alert("Failed to save vote. See console for details.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <article className="ranker-usercard">
-      <div 
+      <div
         className="ranker-usercard-bg"
         style={{ backgroundImage: `url(${candidate.pfp || '/images/default-avatar.jpg'})` }}
       ></div>
-      
+
       <div className="ranker-usercard-overlay">
         <div className="ranker-usercard-header">
           <h2 className="ranker-usercard-name">
@@ -234,13 +366,10 @@ export default function UserCard({ candidate, voter }) {
           </h2>
           <div className="ranker-usercard-details">{candidate.details}</div>
         </div>
-        
+
         <form
           className="ranker-usercard-attributes"
-          onSubmit={e => {
-            e.preventDefault();
-            handleAttributesValues();
-          }}
+          onSubmit={handleAttributesValues}
         >
           {attributes.map((attr) => (
             <div key={attr.id} className="ranker-usercard-attr-item">
@@ -256,27 +385,33 @@ export default function UserCard({ candidate, voter }) {
               <input
                 id={`attr-${attr.id}`}
                 name={attr.name}
-                value={attributeValues[attr.id] || ""}
+                value={attributeValues[String(attr.id)] ?? ""}
                 type="text"
                 className="ranker-usercard-input"
                 onChange={(e) => handleAttributeChange(attr.id, e.target.value)}
                 maxLength={6}
                 inputMode="numeric"
-                placeholder="0-100"
+                placeholder={String(attributeValues[String(attr.id)] ?? "") || "0-100"}
+                disabled={loading}
               />
             </div>
           ))}
         </form>
-        
-        <button className="ranker-usercard-submit" type="submit">
+
+        <button
+          className="ranker-usercard-submit"
+          type="button"
+          onClick={handleAttributesValues}
+          disabled={loading}
+        >
           <FiCheckCircle size={18} />
-          Submit Vote
+          {loading ? "Saving..." : "Submit Vote"}
         </button>
       </div>
-      
+
       {openDetail && (
         <div className="ranker-usercard-attr-details">
-          <button 
+          <button
             onClick={() => setOpenDetail(null)}
             style={{
               position: 'absolute',

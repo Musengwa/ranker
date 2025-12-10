@@ -2,9 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/currentUserContext";
 import Nav from "../components/nav";
-import axios from "axios";
 import UserCard from "../components/userCard";
 import { Helmet } from "react-helmet";
+import supabase from "../config/supabaseClients";
 import { 
   FiRefreshCw, FiX, FiUser, FiAward, FiCheck, FiTrash2, 
   FiBarChart2, FiList, FiStar, FiShare2,
@@ -554,6 +554,7 @@ const HandleCard = ({ candidate, voter, onClose }) => {
   );
 };
 
+
 const VotedAwardsSection = ({ awards, users, currentUser, onVoteAgain }) => {
   const currentYear = new Date().getFullYear();
 
@@ -563,23 +564,17 @@ const VotedAwardsSection = ({ awards, users, currentUser, onVoteAgain }) => {
     <div>
       <div className="section-title">
         <FiAward size={26} />
-        <h2>2025 Awards</h2>
+        <h2>{currentYear} Awards</h2>
       </div>
 
       <div className="awards-grid">
         {awards.map(award => {
-          const yearObj = award.years.find(y => y.year === currentYear);
-          let votedCandidateName = null;
-          
-          if (yearObj) {
-            for (const candidate of yearObj.candidates) {
-              if (candidate.voters.includes(currentUser.name)) {
-                votedCandidateName = candidate.candidate;
-                break;
-              }
-            }
-          }
-          
+          // In relational DB design the mapping is different — this UI displays whether the current user
+          // has any vote_award_values entry for the current year.
+          // We'll mark Voted if `award._votedByCurrentUser` was set when loading awards (or compute externally).
+          const voted = award._votedByCurrentUser;
+          const votedCandidateName = award._votedCandidateName || null;
+
           return (
             <div className="award-card" key={award.id}>
               <div className="award-name">
@@ -599,7 +594,7 @@ const VotedAwardsSection = ({ awards, users, currentUser, onVoteAgain }) => {
                   </span>
                 )}
                 
-                {votedCandidateName && (
+                {voted && (
                   <button 
                     className="icon-btn"
                     onClick={() => onVoteAgain(award.id)}
@@ -633,68 +628,245 @@ const HandleDisplay = () => {
     }
   }, [currentUser, navigate]);
 
+  // Fetch users and awards once on mount
+  useEffect(() => {
+    const loadInitial = async () => {
+      try {
+        const [{ data: usersData, error: usersError }, { data: awardsData, error: awardsError }] = await Promise.all([
+          supabase.from("users").select("*"),
+          supabase.from("awards").select("*")
+        ]);
+
+        if (usersError) throw usersError;
+        if (awardsError) throw awardsError;
+
+        setUsers(usersData || []);
+        setAwards(awardsData || []);
+      } catch (err) {
+        console.error("Error loading initial data:", err);
+      }
+    };
+
+    loadInitial();
+  }, []);
+
+  const enrichAwardsWithUserVotes = useCallback(async (awardsList, voterId, year) => {
+    // For quick UI marks: for each award, check if there exists a vote_award_values entry for this voter+year linking to the award
+    try {
+      if (!voterId) return awardsList;
+      // get votes IDs for this voter + year
+      const { data: votesForVoter, error: votesErr } = await supabase
+        .from("votes")
+        .select("id,candidateid")
+        .eq("voterid", voterId)
+        .eq("year", year);
+
+      if (votesErr) throw votesErr;
+      const voteIds = (votesForVoter || []).map(v => v.id);
+      if (voteIds.length === 0) return awardsList;
+
+      const { data: awardLinks, error: awardLinksErr } = await supabase
+        .from("vote_award_values")
+        .select("voteid,awardid")
+        .in("voteid", voteIds);
+
+      if (awardLinksErr) throw awardLinksErr;
+
+      // Map awardId -> voteId (take first found)
+      const awardToVote = {};
+      awardLinks.forEach(al => {
+        if (!awardToVote[al.awardid]) awardToVote[al.awardid] = al.voteid;
+      });
+
+      // Map voteId -> candidate name using votesForVoter array candidateid -> users
+      const voteIdToCandidateName = {};
+      for (const v of votesForVoter) {
+        const cand = users.find(u => String(u.id) === String(v.candidateid));
+        if (cand) voteIdToCandidateName[v.id] = cand.name;
+      }
+
+      // Attach helper flags to awards
+      return awardsList.map(a => {
+        const voteId = awardToVote[a.id];
+        return {
+          ...a,
+          _votedByCurrentUser: !!voteId,
+          _votedCandidateName: voteId ? voteIdToCandidateName[voteId] : null
+        };
+      });
+    } catch (err) {
+      console.error("Error enriching awards:", err);
+      return awardsList;
+    }
+  }, [users]);
+
+  // Load the current user's votes for the current year
   const handleMyVotes = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/userXvotes");
       if (!currentUser) {
         setMyVotes([]);
         return;
       }
-      const theVotes = response.data.filter(vote => vote.voterID === currentUser.id);
-      setMyVotes(theVotes);
+      const currentYear = new Date().getFullYear();
+
+      // 1) Get votes rows for this voter and year
+      const { data: votesData, error: votesError } = await supabase
+        .from("votes")
+        .select("*")
+        .eq("voterid", currentUser.id)
+        .eq("year", currentYear);
+
+      if (votesError) throw votesError;
+
+      const votesWithDetails = [];
+
+      // Fetch all attribute rows for the votes in one batch if possible
+      const voteIds = (votesData || []).map(v => v.id);
+      let attributeRows = [];
+      if (voteIds.length > 0) {
+        const { data: avData, error: avError } = await supabase
+          .from("vote_attribute_values")
+          .select("*")
+          .in("voteid", voteIds);
+
+        if (avError) throw avError;
+        attributeRows = avData || [];
+      }
+
+      // Preload attributes definitions for all attributeids we need
+      const attributeIds = [...new Set(attributeRows.map(a => a.attributeid))].filter(Boolean);
+      let attributeDefs = [];
+      if (attributeIds.length > 0) {
+        const { data: attrsData, error: attrsError } = await supabase
+          .from("attributes")
+          .select("*")
+          .in("id", attributeIds);
+
+        if (attrsError) throw attrsError;
+        attributeDefs = attrsData || [];
+      }
+
+      // Build votesWithDetails array
+      for (const v of (votesData || [])) {
+        const candidate = users.find(u => String(u.id) === String(v.candidateid)) || null;
+        const voter = users.find(u => String(u.id) === String(v.voterid)) || null;
+
+        // attributes for this vote
+        const thisVoteAttrRows = attributeRows.filter(ar => String(ar.voteid) === String(v.id));
+        const attributes = thisVoteAttrRows.map(ar => {
+          const def = attributeDefs.find(d => String(d.id) === String(ar.attributeid));
+          return {
+            id: ar.attributeid,
+            name: def ? def.name : `Attr ${ar.attributeid}`,
+            value: ar.value
+          };
+        });
+
+        votesWithDetails.push({
+          ...v,
+          candidate,
+          voter,
+          attributes
+        });
+      }
+
+      setMyVotes(votesWithDetails);
+
+      // Also update awards flags for the UI
+      const currentAwards = await enrichAwardsWithUserVotes(await (async () => {
+        const { data } = await supabase.from("awards").select("*");
+        return data || [];
+      })(), currentUser.id, currentYear);
+
+      setAwards(currentAwards);
     } catch (error) {
       console.error("Error fetching votes:", error);
     }
-  }, [currentUser]);
+  }, [currentUser, users, enrichAwardsWithUserVotes]);
 
   useEffect(() => {
     handleMyVotes();
-    axios.get("http://localhost:5000/awards").then(res => setAwards(res.data));
-    axios.get("http://localhost:5000/users").then(res => setUsers(res.data));
+    // ensure awards & users are fresh
+    const reload = async () => {
+      try {
+        const { data: awardsData } = await supabase.from("awards").select("*");
+        const { data: usersData } = await supabase.from("users").select("*");
+        setAwards(awardsData || []);
+        setUsers(usersData || []);
+      } catch (err) {
+        console.error("Error reloading awards/users:", err);
+      }
+    };
+    reload();
   }, [handleMyVotes]);
 
   const fetchCandidateAndVoter = useCallback(async (candidateID, voterID) => {
     try {
-      const usersResponse = await axios.get("http://localhost:5000/users");
-      const users = usersResponse.data;
+      // Try to use cached users first
+      let candidate = users.find(u => String(u.id) === String(candidateID));
+      let voter = users.find(u => String(u.id) === String(voterID));
 
-      const candidate = users.find(user => user.id === candidateID);
-      const voter = users.find(user => user.id === voterID);
+      // If not found, fetch them directly
+      if (!candidate || !voter) {
+        const idsToFetch = [candidateID, voterID].filter(Boolean).map(String);
+        const { data: fetchedUsers, error: usersError } = await supabase
+          .from("users")
+          .select("*")
+          .in("id", idsToFetch);
+
+        if (usersError) throw usersError;
+
+        if (!candidate) candidate = fetchedUsers.find(u => String(u.id) === String(candidateID)) || null;
+        if (!voter) voter = fetchedUsers.find(u => String(u.id) === String(voterID)) || null;
+      }
 
       setSelectedVote({ candidate, voter });
     } catch (error) {
       console.error("Error fetching candidate and voter:", error);
     }
-  }, []);
+  }, [users]);
 
   const handleCloseCard = () => {
     setSelectedVote(null);
   };
 
+  // Remove a user's vote link to an award (delete vote_award_values rows for the current user's votes for that award)
   const handleVoteAgain = async (awardId) => {
     try {
-      const awardsRes = await axios.get("http://localhost:5000/awards");
-      const awardsData = awardsRes.data;
-      const thisAward = awardsData.find(a => a.id === awardId);
-      const yearNum = new Date().getFullYear();
-      let thisYear = thisAward.years.find(y => y.year === yearNum);
+      if (!currentUser) return;
+      const currentYear = new Date().getFullYear();
 
-      if (thisYear) {
-        thisYear.candidates.forEach(c => {
-          c.voters = c.voters.filter(v => v !== currentUser.name);
-        });
-        await axios.put(`http://localhost:5000/awards/${awardId}`, thisAward);
-        axios.get("http://localhost:5000/awards").then(res => setAwards(res.data));
-      }
+      // 1) Get vote IDs for this voter + year
+      const { data: votesForVoter, error: votesErr } = await supabase
+        .from("votes")
+        .select("id")
+        .eq("voterid", currentUser.id)
+        .eq("year", currentYear);
+
+      if (votesErr) throw votesErr;
+      const voteIds = (votesForVoter || []).map(v => v.id);
+      if (voteIds.length === 0) return;
+
+      // 2) Delete vote_award_values where voteid in (...) AND awardid == awardId
+      const { error: delErr } = await supabase
+        .from("vote_award_values")
+        .delete()
+        .in("voteid", voteIds)
+        .eq("awardid", awardId);
+
+      if (delErr) throw delErr;
+
+      // Refresh local state
+      await handleMyVotes();
     } catch (err) {
       console.error("Error removing vote:", err);
     }
   };
 
-  // Stats data for dashboard
+  // Stats data for dashboard (you can compute live values with queries later)
   const stats = [
     { icon: <FiUsers />, value: "24", label: "Total Candidates" },
-    { icon: <FiThumbsUp />, value: "18", label: "Your Votes" },
+    { icon: <FiThumbsUp />, value: String(myVotes.length), label: "Your Votes" },
     { icon: <FiActivity />, value: "92%", label: "Participation Rate" },
     { icon: <FiTrendingUp />, value: "7", label: "Awards Won" }
   ];
@@ -791,11 +963,11 @@ const HandleDisplay = () => {
                   <div className="card-header">
                     <h3 
                       className="card-title" 
-                      onClick={() => fetchCandidateAndVoter(myVote.candidateID, myVote.voterID)}
+                      onClick={() => fetchCandidateAndVoter(myVote.candidateid, myVote.voterid)}
                       style={{ cursor: "pointer" }}
                     >
                       <FiUser size={18} />
-                      Candidate {myVote.candidateID}
+                      {myVote.candidate ? myVote.candidate.name : `Candidate ${myVote.candidateid}`}
                     </h3>
                     
                     <div className="card-actions">
@@ -806,8 +978,8 @@ const HandleDisplay = () => {
                   </div>
                   
                   <div className="attributes-grid">
-                    {myVote.attributes.map((attribute, index) => (
-                      <div className="attribute-item" key={`${myVote.id}-${attribute.id || index}`}>
+                    {myVote.attributes.map((attribute, aIndex) => (
+                      <div className="attribute-item" key={`${myVote.id}-${attribute.id || aIndex}`}>
                         <div className="attribute-label">
                           <FiTarget size={14} />
                           {attribute.name}
