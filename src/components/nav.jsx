@@ -7,7 +7,7 @@ import { FaUserCircle, FaHome, FaChartBar, FaVoteYea, FaAward, FaSignOutAlt, FaB
 const navStyles = `
 .ranker-nav-header {
   width: 100vw;
-  background: rgba(0,0,0,0.12);
+  background: rgba(0, 0, 0, 0.9);
   position: sticky;
   top: 0;
   padding: 0;

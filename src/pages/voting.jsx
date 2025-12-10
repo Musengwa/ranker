@@ -1,54 +1,107 @@
 import UserCard from "../components/userCard";
 import { useEffect, useState, useCallback } from "react";
-import axios from "axios";
 import Nav from "../components/nav";
 import { useUser } from "../context/currentUserContext";
 import { Helmet } from "react-helmet";
+import supabase from "../config/supabaseClients";
+import { useNavigate } from "react-router-dom";
 
 export default function Vote() {
-    const { user: currentUser, setUser } = useUser();
-    const [candidates, setCandidates] = useState([]); // State to store candidates
-    
-    // Fetch users from JSON server
-    const fetchUsers = useCallback(async () => {
-        try {
-            const response = await axios.get("http://localhost:5000/users");
-            const users = response.data;
+  const { user: currentUser, setUser } = useUser();
+  const [candidates, setCandidates] = useState([]); // candidates list
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-            // Filter out the current user
-            const filteredCandidates = users.filter(user => user.id !== currentUser.id);
-            setCandidates(filteredCandidates);
+  // Fetch users from Supabase and exclude the current user
+  const fetchUsers = useCallback(async () => {
+    setError(null);
+    setLoading(true);
 
-            // Set the current user
-            const user = users.find(user => user.id === currentUser.id);
-            setUser(user);
-        } catch (error) {
-            console.error("Error fetching users:", error);
+    try {
+      // If no currentUser we still fetch candidates (useful for anonymous browsing),
+      // but many flows will want to redirect to login. Uncomment redirect if desired.
+      // if (!currentUser) { navigate("/login"); return; }
+
+      // If there is a currentUser, filter them out server-side.
+      let query = supabase.from("users").select("*");
+
+      if (currentUser && currentUser.id !== undefined && currentUser.id !== null) {
+        // Use server-side filter to avoid transferring unnecessary data
+        query = query.neq("id", currentUser.id);
+      }
+
+      const { data: users, error: fetchErr } = await query;
+
+      if (fetchErr) {
+        throw fetchErr;
+      }
+
+      const usersList = users || [];
+
+      // Set candidates to all other users (or all users if currentUser is not set)
+      setCandidates(usersList);
+
+      // If we have a currentUser and want to refresh the context user from DB:
+      if (currentUser && currentUser.id !== undefined && currentUser.id !== null) {
+        // attempt to fetch the authoritative currentUser record
+        const { data: freshUser, error: userErr } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", currentUser.id)
+          .maybeSingle();
+
+        if (!userErr && freshUser) {
+          setUser(freshUser);
         }
-    }, [currentUser, setUser]);
+      }
+    } catch (err) {
+      console.error("Error fetching users from Supabase:", err);
+      setError(err.message || "Failed to load users");
+      setCandidates([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentUser, setUser, navigate]);
 
-    useEffect(() => {
-        fetchUsers();
-    }, [fetchUsers]);
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
-    return (
-        <>
-            <Nav/>
-            <Helmet>
-                <title>Rank Candidates | Voting Page</title>
-                <meta name="description" content="Vote and rank candidates on the Ranker platform." />
-                <meta name="keywords" content="voting, ranker, candidates, user ranking" />
-            </Helmet>
-            <h1 style={{color: "ghostwhite", fontSize: 30, fontWeight:300, padding: 7, marginLeft: 30 }}>rank</h1>
-            <div className="candidates">
-                {candidates.map(candidate => (
-                    <UserCard
-                        key={candidate.id}
-                        candidate={candidate}
-                        voter={currentUser}
-                    />
-                ))}
+  return (
+    <>
+      <Nav />
+      <Helmet>
+        <title>Rank Candidates | Voting Page</title>
+        <meta name="description" content="Vote and rank candidates on the Ranker platform." />
+        <meta name="keywords" content="voting, ranker, candidates, user ranking" />
+      </Helmet>
+
+      <div style={{ padding: 20 }}>
+        <h1 style={{ color: "ghostwhite", fontSize: 30, fontWeight: 300, padding: 7, marginLeft: 30 }}>
+          rank
+        </h1>
+
+        {error && (
+          <div style={{ color: "salmon", marginLeft: 30 }}>{error}</div>
+        )}
+
+        <div className="candidates" style={{ display: "grid", gap: 12, padding: 20 }}>
+          {candidates.length === 0 && !loading && (
+            <div style={{ color: "#94a3b8", marginLeft: 30 }}>
+              No candidates found.
             </div>
-        </>
-    );
+          )}
+
+          {candidates.map(candidate => (
+            <UserCard
+              key={candidate.id}
+              candidate={candidate}
+              voter={currentUser}
+            />
+          ))}
+        </div>
+      </div>
+    </>
+  );
 }
