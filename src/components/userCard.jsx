@@ -23,8 +23,11 @@ const userCardStyles = `
   left: 0;
   right: 0;
   bottom: 0;
+  /* Default background is the provided artwork; candidate.pfp overrides via inline style when available */
+  background-image: url('/images/1763198776206.jpg');
   background-size: cover;
   background-position: center;
+  filter: saturate(1.05) contrast(0.95);
   z-index: 1;
 }
 
@@ -34,7 +37,7 @@ const userCardStyles = `
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(50, 50, 60, 0.76);
+  background: hsla(0, 0%, 9%, 0.76);
   backdrop-filter: blur(15px);
   z-index: 2;
   display: flex;
@@ -73,13 +76,13 @@ const userCardStyles = `
   border: 1px solid rgba(74, 90, 121, 0.2);
   border-radius: 0.6rem;
   margin-bottom: 0.5rem;
-  padding: 8px
+  padding: 8px;
   z-index: 3;
 }
 
 .ranker-usercard-attr-item {
   padding: 0.2rem;
-  margin top: 0.1 rem;
+  margin-top: 0.1rem;
 }
 
 .ranker-usercard-label {
@@ -93,11 +96,11 @@ const userCardStyles = `
 }
 
 .ranker-usercard-label svg {
-  color: #f59e0b;
+  color: #0b1ff5ff;
 }
 
 .ranker-usercard-input {
-  width: 70%;
+  width: 50%;
   background: rgba(15, 23, 42, 0.4);
   border: 1px solid rgba(74, 90, 121, 0.3);
   border-radius: 0.5rem;
@@ -145,13 +148,50 @@ const userCardStyles = `
   z-index: 3;
 }
 
-@media (max-width: 400px) {
+@media (max-width: 480px) {
   .ranker-usercard {
-    max-width: 280px;
+    max-width: 98%;
+    margin: 0.75rem auto;
+    aspect-ratio: auto;
+    min-height: 240px;
+    padding: 0.75rem;
+    aspect-ratio: 3 / 5;
+    margin-bottom: 20%;
   }
-  
+
+  .ranker-usercard-name {
+    font-size: 1.1rem;
+  }
+
+  .ranker-usercard-details {
+    font-size: 0.85rem;
+  }
+
+  /* Keep attributes as a compact 2-column grid on mobile for better density */
   .ranker-usercard-attributes {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.1rem;
+    padding: 4px;
+  }
+
+  .ranker-usercard-input {
+    width: 70%;
+    font-size: 0.85rem;
+    padding: 0.2rem;
+  }
+
+  .ranker-usercard-submit {
+    padding: 0.65rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Very narrow screens stack attributes to one column to avoid cramped inputs */
+@media (max-width: 360px) {
+  .ranker-usercard-attributes {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.1rem;
+    padding: 4px;
   }
 }
 `;
@@ -163,30 +203,6 @@ if (typeof document !== "undefined" && !document.getElementById("ranker-usercard
   style.innerHTML = userCardStyles;
   document.head.appendChild(style);
 }
-
-// helper: parse a max value from attribute details when possible, fallback to default
-const parseMaxFromAttr = (attr) => {
-  if (!attr) return 20;
-  // if there's an explicit `max` field use it
-  if (typeof attr.max === "number") return attr.max;
-  // try to find "0-20", "0 to 20", "max 20" patterns in details
-  const d = String(attr.details || "");
-  const rangeMatch = d.match(/(\d{1,3})\s*(?:-|to)\s*(\d{1,3})/i);
-  if (rangeMatch) return parseInt(rangeMatch[2], 10);
-  const maxMatch = d.match(/max[:\s]*?(\d{1,3})/i);
-  if (maxMatch) return parseInt(maxMatch[1], 10);
-  // safe default
-  return 20;
-};
-
-// convert and clamp to integer in [min, max]
-const toIntClamped = (val, min = 0, max = 100) => {
-  const num = parseInt(val, 10);
-  if (isNaN(num)) return min;
-  if (num < min) return min;
-  if (num > max) return max;
-  return num;
-};
 
 export default function UserCard({ candidate, voter }) {
   const [attributeValues, setAttributeValues] = useState({});
@@ -355,7 +371,8 @@ export default function UserCard({ candidate, voter }) {
     <article className="ranker-usercard">
       <div
         className="ranker-usercard-bg"
-        style={{ backgroundImage: `url(${candidate.pfp || '/images/default-avatar.jpg'})` }}
+        style={{ backgroundImage: `url(${candidate?.pfp || '/images/1763198776206.jpg'})` }}
+        aria-hidden="true"
       ></div>
 
       <div className="ranker-usercard-overlay">

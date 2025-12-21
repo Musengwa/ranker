@@ -12,3 +12,22 @@ and then the lines represent the voters
 then each user have a bar graph , each bar, layered by the percentage of their  candidates votes
 
 change profile design
+
+create an sql database, a user table (id, name, pfp, country, email, club, position)
+a vote table(id, candidateId(foriegn key from users), voterId(foreign key from users), [attribute columns], [awards columns] year, groupID, A.P )
+is there a way to add attributes columns to votes, we are just getting the attribute name as a column in votes, and then in the column a value. same as for awards
+
+an attribute table (name, id, details)
+an awards table (name, id, detail)
+
+results table(id, candidate, year, [average of each attribute rating to that candidate that year], [the sum of votes for each award for that candidate that year])
+
+
+### clanondor, 
+create clannondor group
+add pics to public, link by name,
+fix award analyis,
+fix award vote 
+unify theme
+add a fiew more images
+test with real users

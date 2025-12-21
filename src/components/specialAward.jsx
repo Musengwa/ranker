@@ -1,174 +1,487 @@
-import axios from "axios";
+import supabase from "../config/supabaseClients";
 import { useUser } from "../context/currentUserContext";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import "../pages/awardStyle.css";
+import { FiAlertTriangle, FiUser, FiInfo } from "react-icons/fi";
 
-export default function SpecialAward({ award, onVoted }) {
-    const { user: currentUser } = useUser();
-    const [candidates, setCandidates] = useState([]);
-    const [hasVoted, setHasVoted] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [votedCandidate, setVotedCandidate] = useState(null);
+export default function SpecialAward({ award, groupId, onVoted }) {
+  const { user: currentUser } = useUser();
+  const [candidates, setCandidates] = useState([]);
+  const [hasVoted, setHasVoted] = useState(false);
+  const [votedCandidate, setVotedCandidate] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [error, setError] = useState(null);
 
-    useEffect(() => {
-        fetchData();
-        // eslint-disable-next-line
-    }, [award, currentUser]);
+  const year = new Date().getFullYear();
 
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const usersRes = await axios.get("http://localhost:5000/users");
-            const users = usersRes.data;
-            setCandidates(users.filter(u => u.id !== currentUser.id));
-
-            const awardsRes = await axios.get("http://localhost:5000/awards");
-            const awards = awardsRes.data;
-            const thisAward = awards.find(a => a.id === award.id);
-            const thisYear = thisAward.years.find(y => y.year === new Date().getFullYear());
-
-            let found = false;
-            let votedName = null;
-            if (thisYear) {
-                for (const candidate of thisYear.candidates) {
-                    if (candidate.voters.includes(currentUser.name)) {
-                        found = true;
-                        votedName = candidate.candidate;
-                        break;
-                    }
-                }
-            }
-            setHasVoted(found);
-            if (found) {
-                const voted = users.find(u => u.name === votedName);
-                setVotedCandidate(voted);
-            } else {
-                setVotedCandidate(null);
-            }
-        } catch (err) {
-            console.error("Error loading data:", err);
-        }
-        setLoading(false);
-    };
-
-    const handleVote = async (candidate) => {
-        if (hasVoted) return;
-        try {
-            const awardsRes = await axios.get("http://localhost:5000/awards");
-            const awards = awardsRes.data;
-            const thisAward = awards.find(a => a.id === award.id);
-            const yearNum = new Date().getFullYear();
-            let thisYear = thisAward.years.find(y => y.year === yearNum);
-
-            if (!thisYear) {
-                thisYear = {
-                    year: yearNum,
-                    winner: null,
-                    candidates: candidates.map(u => ({
-                        candidate: u.name,
-                        voters: []
-                    }))
-                };
-                thisAward.years.push(thisYear);
-            }
-
-            // Remove user from all candidates' voters (in case of re-vote)
-            thisYear.candidates.forEach(c => {
-                c.voters = c.voters.filter(v => v !== currentUser.name);
-            });
-
-            // Add to selected candidate
-            const candidateEntry = thisYear.candidates.find(c => c.candidate === candidate.name);
-            if (candidateEntry && !candidateEntry.voters.includes(currentUser.name)) {
-                candidateEntry.voters.push(currentUser.name);
-            }
-
-            await axios.put(`http://localhost:5000/awards/${award.id}`, thisAward);
-
-            setHasVoted(true);
-            setVotedCandidate(candidate);
-            if (onVoted) onVoted();
-            alert("Vote submitted!");
-        } catch (err) {
-            console.error("Error submitting vote:", err);
-        }
-    };
-
-    // NEW: Remove vote and allow voting again
-    const handleVoteAgain = async () => {
-        try {
-            const awardsRes = await axios.get("http://localhost:5000/awards");
-            const awards = awardsRes.data;
-            const thisAward = awards.find(a => a.id === award.id);
-            const yearNum = new Date().getFullYear();
-            let thisYear = thisAward.years.find(y => y.year === yearNum);
-
-            if (thisYear) {
-                thisYear.candidates.forEach(c => {
-                    c.voters = c.voters.filter(v => v !== currentUser.name);
-                });
-                await axios.put(`http://localhost:5000/awards/${award.id}`, thisAward);
-            }
-            setHasVoted(false);
-            setVotedCandidate(null); 
-            if (onVoted) onVoted();
-            fetchData();
-        } catch (err) {
-            console.error("Error removing vote:", err);
-        }
-    };
-
-    if (loading) return <div style={{color:"blue"}}>Loading...</div>;
-    if (hasVoted && votedCandidate) {
-        return (
-            <div style={{backgroundColor:"rgba(18, 19, 19, 1)", border: "1px solid grey", width: "85%", placeItems: "center", placeContent: "center",placeSelf: "center", borderRadius: 10, marginTop: 30, padding: 10}}>
-                <p>already voted.</p>
-                <p>this is your pick for <b>{award.name}</b> : <b>{votedCandidate.name}</b></p>
-                <img
-                    src={votedCandidate.pfp || "/default-avatar.png"}
-                    alt={`Portrait of ${votedCandidate.name}`}
-                    width= '40%' height='100%'
-                    style={{backgroundColor:"rgb(38, 38, 38)", border: "1px solid rgba(73, 72, 72, 1)", borderRadius:40, padding: 0, width: 350, height: 300}}
-                />
-                <br />
-                <button onClick={handleVoteAgain} style={{marginTop: 12 , placeSelf:"center", marginLeft: "20%", padding: 10, width: "60"}}>Vote Again</button>
-            </div>
-        );
+  useEffect(() => {
+    console.log("SpecialAward mounted with:", { 
+      award, 
+      groupId, 
+      currentUser: currentUser?.id 
+    });
+    
+    if (!currentUser) {
+      console.log("No current user");
+      setError("Please log in to vote");
+      setLoading(false);
+      return;
     }
-    if (hasVoted) return (
-        <div>
-            You have already voted for this award.
-            <br />
-            <button onClick={handleVoteAgain} style={{marginTop: 12}}>Vote Again</button>
-        </div>
-    );
+    
+    if (!award) {
+      console.log("No award provided");
+      setError("No award selected");
+      setLoading(false);
+      return;
+    }
+    
+    if (!groupId) {
+      console.log("No group ID provided");
+      setError("No group selected");
+      setLoading(false);
+      return;
+    }
+    
+    loadData();
+    // eslint-disable-next-line
+  }, [award, currentUser, groupId]);
 
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log("Loading data for award:", award.id, "group:", groupId);
+      console.log("Current user:", currentUser.id);
+
+      // 1️⃣ First, get all users in the same group (excluding current user)
+      console.log("Fetching group members...");
+      const { data: groupMembers, error: groupError } = await supabase
+        .from("user_groups")
+        .select(`
+          userid,
+          users!inner (id, name, pfp, email)
+        `)
+        .eq("groupid", groupId)
+        .neq("users.id", currentUser.id); // Exclude current user
+
+      if (groupError) {
+        console.error("Error fetching group members:", groupError);
+        setError("Failed to load group members");
+        throw groupError;
+      }
+
+      // Extract user data from the join
+      const users = groupMembers?.map(gm => gm.users) || [];
+      console.log("Candidates found:", users.length);
+      setCandidates(users);
+
+      // 2️⃣ Check if user already voted for this award in this group
+      console.log("Checking existing vote...");
+      
+      // First, get the vote for this user in this group and year
+      const { data: existingVote, error: voteError } = await supabase
+        .from("votes")
+        .select(`
+          id,
+          candidateid,
+          vote_award_values (
+            awardid
+          )
+        `)
+        .eq("voterid", currentUser.id)
+        .eq("groupid", groupId)
+        .eq("year", year)
+        .maybeSingle();
+
+      if (voteError && voteError.code !== 'PGRST116') {
+        console.error("Error checking vote:", voteError);
+        setError("Failed to check voting status");
+        throw voteError;
+      }
+
+      console.log("Existing vote:", existingVote);
+
+      if (existingVote) {
+        // Check if this vote is linked to our award
+        const awardLinked = existingVote.vote_award_values?.some(
+          vav => vav.awardid === award.id
+        );
+        
+        if (awardLinked) {
+          setHasVoted(true);
+          const votedUser = users.find(u => u.id === existingVote.candidateid);
+          if (votedUser) {
+            setVotedCandidate(votedUser);
+          } else {
+            console.warn("Voted candidate not found in users list");
+            // Try to fetch the candidate directly
+            const { data: candidateData } = await supabase
+              .from("users")
+              .select("*")
+              .eq("id", existingVote.candidateid)
+              .single();
+            
+            if (candidateData) {
+              setVotedCandidate(candidateData);
+            } else {
+              setVotedCandidate({ 
+                id: existingVote.candidateid, 
+                name: "Unknown Candidate" 
+              });
+            }
+          }
+        } else {
+          setHasVoted(false);
+          setVotedCandidate(null);
+        }
+      } else {
+        setHasVoted(false);
+        setVotedCandidate(null);
+      }
+
+    } catch (err) {
+      console.error("Error in loadData:", err);
+      setError(err.message || "Failed to load data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVote = async (candidate) => {
+    if (!currentUser) {
+      setError("Please log in to vote");
+      return;
+    }
+    
+    if (!groupId) {
+      setError("No group selected");
+      return;
+    }
+    
+    setSelectedCandidate(candidate);
+    setShowConfirmation(true);
+  };
+
+  const confirmVote = async () => {
+    if (!selectedCandidate || !currentUser || !groupId) return;
+
+    try {
+      setError(null);
+      
+      console.log("Creating vote for candidate:", selectedCandidate.id);
+      console.log("In group:", groupId, "For award:", award.id);
+
+      // 1️⃣ Create vote (with groupid as required by schema)
+      const { data: vote, error: voteErr } = await supabase
+        .from("votes")
+        .insert({
+          voterid: currentUser.id,
+          candidateid: selectedCandidate.id,
+          groupid: groupId,
+          year: year
+        })
+        .select()
+        .single();
+
+      if (voteErr) {
+        console.error("Vote creation error:", voteErr);
+        setError("Failed to submit vote: " + voteErr.message);
+        return;
+      }
+
+      console.log("Vote created:", vote.id);
+
+      // 2️⃣ Link award to vote
+      const { error: awardErr } = await supabase
+        .from("vote_award_values")
+        .insert({
+          voteid: vote.id,
+          awardid: award.id
+        });
+
+      if (awardErr) {
+        console.error("Award link error:", awardErr);
+        // Rollback the vote if award linking fails
+        await supabase.from("votes").delete().eq("id", vote.id);
+        setError("Failed to link award: " + awardErr.message);
+        return;
+      }
+
+      console.log("Award linked successfully");
+      setHasVoted(true);
+      setVotedCandidate(selectedCandidate);
+      setShowConfirmation(false);
+      
+      // Show success for 2 seconds before closing
+      setTimeout(() => {
+        if (onVoted) onVoted();
+      }, 2000);
+      
+    } catch (err) {
+      console.error("Vote error:", err);
+      setError("An unexpected error occurred: " + err.message);
+    }
+  };
+
+  const handleVoteAgain = async () => {
+    if (!currentUser || !groupId) return;
+    
+    try {
+      setLoading(true);
+      
+      console.log("Deleting existing vote...");
+      
+      // Find and delete the existing vote for this user, group, and year
+      const { data: existingVote } = await supabase
+        .from("votes")
+        .select("id")
+        .eq("voterid", currentUser.id)
+        .eq("groupid", groupId)
+        .eq("year", year)
+        .maybeSingle();
+
+      if (existingVote) {
+        // Delete from vote_award_values first (foreign key constraint)
+        await supabase
+          .from("vote_award_values")
+          .delete()
+          .eq("voteid", existingVote.id);
+        
+        // Then delete the vote
+        await supabase
+          .from("votes")
+          .delete()
+          .eq("id", existingVote.id);
+        
+        console.log("Vote deleted:", existingVote.id);
+      }
+
+      setHasVoted(false);
+      setVotedCandidate(null);
+      setShowConfirmation(false);
+      await loadData();
+      
+    } catch (err) {
+      console.error("Error deleting vote:", err);
+      setError("Failed to reset vote: " + err.message);
+    }
+  };
+
+  if (loading) {
     return (
-        <section style={{background:"rgb(17, 17, 17)", color:"rgb(174, 174, 174)", margin: 15, padding: 10, borderRadius: 8}}>
-            <article className="award">
-                <header className="award-details">
-                    <h1>{award.name}</h1>
-                    <p>{award.description}</p>
-                </header>
-                    <h2>Candidates</h2>
-                <section className="candidates" style={{ display: "flex", flexWrap: "wrap", flexDirection: "row"}}>
-                    {candidates.map(candidate => (
-                        <article className="candidate" key={candidate.id} style={{backgroundColor:"rgb(19, 19, 19)", backgroundImage: `url(${candidate.pfp || '/images/default-avatar.jpg'})` , border: "1px solid grey", justifyItems: "center", margin: 5, marginBottom: 15, padding: 5, borderRadius: 16, width: 180, height: 280}}>
-                
-                            <div className="details">
-                                <h3>{candidate.name}</h3>
-                            </div>
-                            <button 
-                                onClick={() => handleVote(candidate)}
-                                aria-label={`Vote for ${candidate.name} for ${award.name}`}
-                                disabled={hasVoted}
-                                style={{padding:7, borderRadius: 5}}
-                            >
-                                pick me
-                            </button>
-                        </article>
-                    ))}
-                </section>
-            </article>
-        </section>
+      <div className="loading-state">
+        <div className="loading-pulse"></div>
+        <p className="loading-text">Loading voting interface...</p>
+      </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <div className="error-icon"><FiAlertTriangle size={28} /></div>
+        <h3>Error</h3>
+        <p>{error}</p>
+        <button 
+          className="retry-button"
+          onClick={loadData}
+        >
+          Retry
+        </button>
+        <button 
+          className="secondary-button"
+          onClick={onVoted}
+          style={{ marginTop: '10px' }}
+        >
+          Close
+        </button>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="login-prompt">
+        <h3>Login Required</h3>
+        <p>Please log in to participate in voting.</p>
+        <button 
+          className="primary-button"
+          onClick={onVoted}
+          style={{ marginTop: '20px' }}
+        >
+          Close
+        </button>
+      </div>
+    );
+  }
+
+  if (hasVoted && votedCandidate) {
+    return (
+      <div className="voted-container">
+        <div className="success-header">
+          <div className="success-icon">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M24 44C35.0457 44 44 35.0457 44 24C44 12.9543 35.0457 4 24 4C12.9543 4 4 12.9543 4 24C4 35.0457 12.9543 44 24 44Z" stroke="#9333EA" strokeWidth="3"/>
+              <path d="M16 24L22 30L32 20" stroke="#9333EA" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <h2 className="success-title">Vote Submitted!</h2>
+          <p className="success-subtitle">
+            Your vote for <span className="award-highlight">{award.name}</span> has been recorded
+          </p>
+        </div>
+        
+        <div className="voted-card">
+          <div className="voted-avatar">
+            <img
+              src={votedCandidate.pfp || "/default-avatar.png"}
+              alt={votedCandidate.name}
+              className="avatar-image"
+              onError={(e) => {
+                e.target.src = "/default-avatar.png";
+              }}
+            />
+            <div className="voted-badge">Your Pick</div>
+          </div>
+          <div className="voted-details">
+            <h3 className="voted-name">{votedCandidate.name || "Unknown Candidate"}</h3>
+            <p className="voted-bio">
+              Thank you for participating in this year's awards!
+            </p>
+            <p className="voted-year">
+              Year: {year} • Group Voting
+            </p>
+          </div>
+        </div>
+        
+        <div className="action-buttons">
+          <button className="secondary-button" onClick={handleVoteAgain}>
+            Change Vote
+          </button>
+          <button className="primary-button" onClick={onVoted}>
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="award-voting-container">
+      {/* Confirmation Modal */}
+      {showConfirmation && selectedCandidate && (
+        <div className="confirmation-overlay">
+          <div className="confirmation-modal">
+            <h3 className="confirmation-title">Confirm Your Vote</h3>
+            <p className="confirmation-text">
+              You are about to vote for <strong>{selectedCandidate.name}</strong> in the{" "}
+              <strong>{award.name}</strong> category.
+            </p>
+            <p className="confirmation-details">
+              Year: {year} • Group Voting
+            </p>
+            <p className="confirmation-warning">
+              This action cannot be undone unless you use "Change Vote".
+            </p>
+            
+            <div className="confirmation-actions">
+              <button 
+                className="cancel-button"
+                onClick={() => setShowConfirmation(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="confirm-button"
+                onClick={confirmVote}
+              >
+                Confirm Vote
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Award Header */}
+      <div className="award-header">
+        <div className="award-title-section">
+          <h1 className="award-title">{award.name}</h1>
+          <p className="award-description">{award.details}</p>
+        </div>
+        <div className="award-meta">
+          <span className="meta-tag">Voting Open</span>
+          <span className="meta-tag">{year} Awards</span>
+          <span className="meta-tag">Group Voting</span>
+        </div>
+      </div>
+
+      {/* Candidates Grid */}
+      <div className="candidates-section">
+        <div className="section-header">
+          <h2 className="section-title">
+            Select Your Candidate {candidates.length > 0 && `(${candidates.length} available)`}
+          </h2>
+          <p className="section-subtitle">
+            Click on a candidate to cast your vote
+          </p>
+        </div>
+
+        {candidates.length === 0 ? (
+          <div className="no-candidates">
+            <div className="no-candidates-icon"><FiUser size={36} /></div>
+            <h4>No Candidates Available</h4>
+            <p>There are no other users in your group to vote for.</p>
+            <p className="hint-text">Make sure users are added to your group in the user_groups table.</p>
+          </div>
+        ) : (
+          <div className="candidates-grid">
+            {candidates.map(candidate => (
+              <div
+                key={candidate.id}
+                className="candidate-card"
+                onClick={() => handleVote(candidate)}
+              >
+                <div className="candidate-avatar">
+                  <img
+                    src={candidate.pfp || "/default-avatar.png"}
+                    alt={candidate.name}
+                    className="candidate-image"
+                    onError={(e) => {
+                      e.target.src = "/default-avatar.png";
+                    }}
+                  />
+                  <div className="vote-overlay">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
+                        stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+                
+                <div className="candidate-info">
+                  <h3 className="candidate-name">{candidate.name}</h3>
+                  <p className="candidate-position">Group Member</p>
+                  <p className="candidate-email">{candidate.email || "No email"}</p>
+                </div>
+                
+                <button className="select-button">
+                  Select
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 0V16M8 16L14 10M8 16L2 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        <div className="voting-info">
+          <p><FiInfo style={{ verticalAlign: "middle", marginRight: 8 }} /> You can only vote once per award per year. Use "Change Vote" to modify your selection.</p>
+        </div>
+      </div>
+    </div>
+  );
 }

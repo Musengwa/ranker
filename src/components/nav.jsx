@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../context/currentUserContext";
 import { useEffect, useState } from "react";
-import { FaUserCircle, FaHome, FaChartBar, FaVoteYea, FaAward, FaSignOutAlt, FaBars, FaTimes } from "react-icons/fa";
+import { FaUserCircle, FaHome, FaChartBar, FaVoteYea, FaAward, FaSignOutAlt, FaBars, FaTimes  } from "react-icons/fa";
 
 // --- Improved, Sleek Black Nav CSS ---
 const navStyles = `
@@ -15,6 +15,7 @@ const navStyles = `
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 .ranker-nav-bar {
+  background: rgba(0, 0, 0, 0.9);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -66,7 +67,7 @@ const navStyles = `
 }
 .ranker-nav-links a:hover, .ranker-nav-links a:focus {
   background: #232336;
-  color: #38bdf8;
+  color: #5b38f8ff;
   outline: none;
 }
 .ranker-nav-hamburger {
@@ -74,14 +75,16 @@ const navStyles = `
   background: none;
   border: none;
   font-size: 2.1rem;
-  color: #38bdf8;
+  color: #8b5cf6
+;
   cursor: pointer;
   margin-left: 0.5rem;
   z-index: 101;
   transition: color 0.2s;
 }
 .ranker-nav-hamburger:active {
-  color: #0ea5e9;
+  color: #8b5cf6
+;
 }
 @media (max-width: 700px) {
   .ranker-nav-bar {
@@ -199,6 +202,11 @@ export default function Nav() {
           <li>
             <Link to="/awards" title="See Awards" onClick={closeMenu}>
               <FaAward size={18} /> <span>Awards</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/results" title="See results" onClick={closeMenu}>
+              <FaTimes size={18} /> <span>Show room</span>
             </Link>
           </li>
           <li>

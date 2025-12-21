@@ -1,80 +1,79 @@
 import FutPlayerCard from "../components/fc_card";
 import { useEffect, useState } from "react";
+import supabase from "../config/supabaseClients";
+import Nav from "../components/nav"
+import AwardResultsView from "../components/awardResults"
+
 export default function ShowRoom() {
 
-    const [votes, setVotes] = useState([]);
-    const [candidates, setCandidates] = useState([]);
-    const [cardData, setCardData] = useStatetate({
-        ratings: 0,
-        position: "N/A",
-        nation: "zambia.svg",
-        club: "N/A",
-        newAtr1: 0,
-        newAtr2: 0,
-        name: "",
-        atr1: 0,
-        atr2: 0,
-        atr3: 0,
-        atr4: 0,
-        atr5: 0,
-        atr6: 0,
-})
-    const [cardDeck, setCardDeck] = useState([])
+  const [cardDeck, setCardDeck] = useState([]);
 
-    const handleRankResults = () => {
-       candidates.forEach(user => {
-        setCardData({
-        ratings: 0,
-        position: user.position,
-        nation: user.nation,
-        club: user.club,
-        newAtr1: (votes.filter((myVotes)=> {myVotes.candidateId = user.id; myVotes.year = 2025}).reduce((sum, item) => sum + item.newAtr1, 0))/candidates.length,
-        newAtr2: votes.filter((myVotes)=> {myVotes.candidateId = user.id; myVotes.year = 2025}).reduce((sum, item) => sum + item.newAtr2, 0),
-        name: user.name,
-        atr1: votes.filter((myVotes)=> {myVotes.candidateId = user.id; myVotes.year = 2025}).reduce((sum, item) => sum + item.atr1, 0),
-        atr2: votes.filter((myVotes)=> {myVotes.candidateId = user.id; myVotes.year = 2025}).reduce((sum, item) => sum + item.atr2, 0),
-        atr3: votes.filter((myVotes)=> {myVotes.candidateId = user.id; myVotes.year = 2025}).reduce((sum, item) => sum + item.atr3, 0),
-        atr4: votes.filter((myVotes)=> {myVotes.candidateId = user.id; myVotes.year = 2025}).reduce((sum, item) => sum + item.atr4, 0),
-        atr5: votes.filter((myVotes)=> {myVotes.candidateId = user.id; myVotes.year = 2025}).reduce((sum, item) => sum + item.atr5, 0),
-        atr6: votes.filter((myVotes)=> {myVotes.candidateId = user.id; myVotes.year = 2025}).reduce((sum, item) => sum + item.atr6, 0)
-})
-setCardDeck([...cardDeck, cardData])
- 
-       });
-    }
+  useEffect(() => {
+    const fetchData = async () => {
+      // Fetch users
+      const { data: users, error: userErr } = await supabase
+        .from("users")
+        .select("*");
 
-    useEffect(() => {
-        handleRankResults();
-        axios.get("http://localhost:5000/votes").then(res => setVotes(res.data)).catch(error => console.error("Error fetching votes:", error));
-        axios.get("http://localhost:5000/users").then(res => setCandidates(res.data)).catch(error => console.error("Error fetching candidates:", error));
-    }, []);
+      if (userErr) {
+        console.error("Error fetching users:", userErr);
+        return;
+      }
 
-    return (
-        <>
-            <div>
-                <div className="cardDisplay">
-                    <div className="cardGrid">
-                        {cardDeck.map((card)=> (
-                            <FutPlayerCard
-                                rating={card.rating}
-                                position= {card.position}
-                                nation= {card.nation}
-                                club= {card.club}
-                                skill={card.skill}
-                                weakFoot={card.weakFoot}
-                                name= {card.name}
-                                pac={card.atr1}
-                                sho={card.atr2}
-                                pas={card.atr3}
-                                dri={card.atr4}
-                                def={card.atr5}
-                                phy={card.atr6}
-                            />
-                        ))
-                        }
-                    </div>
-                </div>
-            </div>
-        </>
-    )
+      // Fetch attribute results view
+      const { data: attrs, error: attrErr } = await supabase
+        .from("attribute_results")
+        .select("*");
+
+      if (attrErr) {
+        console.error("Error fetching attribute results:", attrErr);
+        return;
+      }
+
+      // Build card deck
+      const deck = users.map(user => {
+        const userAttrs = attrs.filter(a => a.candidateid === user.id);
+
+        const attrMap = {};
+        userAttrs.forEach(row => {
+          attrMap[`atr${row.attributeid}`] = row.avgrating || 0;
+        });
+
+        return {
+          rating: 0,
+          position: user.position || "N/A",
+          nation: user.country || "zambia.svg",
+          club: user.club || "N/A",
+          name: user.name,
+          ...attrMap
+        };
+      });
+
+      setCardDeck(deck);
+    };
+
+    fetchData();
+  }, []);
+
+  return (
+    <div style={{backgroundColor: 'black'}}>
+        <Nav/>
+     <AwardResultsView/>
+      <div className="cardGrid">
+        {cardDeck.map((card, i) => (
+          <FutPlayerCard
+            key={i}
+            rating={card.rating}
+            name={card.name}
+            pac={card.atr1 || 0}
+            sho={card.atr2 || 0}
+            pas={card.atr3 || 0}
+            dri={card.atr4 || 0}
+            def={card.atr5 || 0}
+            phy={card.atr6 || 0}
+          />
+        ))}
+      </div>
+    </div>
+  );
 }

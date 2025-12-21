@@ -4,8 +4,10 @@ import Voting from "./pages/voting";
 import Auth from "./pages/login";
 import GrantAnalysis from "./pages/analysis";
 import Awards from "./pages/awards";
+import ShowRoom from "./pages/showRoom"
 import './App.css';
 import { UserContextProvider } from "./context/currentUserContext";
+
 
 function App() {
   return (
@@ -17,6 +19,7 @@ function App() {
         <Route path="/voting" element={<Voting />} />
         <Route path="/analysis" element={<GrantAnalysis />} />
         <Route path="/awards" element={<Awards />} />
+        <Route path="/results" element={<ShowRoom />} />
       </Routes>
     </UserContextProvider>
     </div>

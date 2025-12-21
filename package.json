@@ -5,8 +5,8 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/material": "^7.3.1",
-    "@mui/x-charts": "^8.10.1",
+    "@mui/material": "^7.3.6",
+    "@mui/x-charts": "^8.22.0",
     "@supabase/supabase-js": "^2.87.1",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",

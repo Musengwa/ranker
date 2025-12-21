@@ -4,8 +4,8 @@ import './FutPlayCard.css'; // We'll extract the CSS to a separate file
 const FutPlayerCard = ({
   rating = 97,
   position = "RW",
-  nation = "argentina.svg",
-  club = "barcelona.svg",
+  nation = "zambia.jpg",
+  club = "manchester_united.png",
   playerImage = "messi.png",
   skills = 4,
   weakFoot = 4,
