@@ -210,7 +210,7 @@ export default function Awards() {
               </button>
               <SpecialAward
                 award={selectedAward}
-                groupId={currentGroup.id}
+                groupId={3}
                 onVoted={closeAwardModal}
               />
             </div>

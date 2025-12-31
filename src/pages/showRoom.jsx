@@ -45,6 +45,7 @@ export default function ShowRoom() {
           nation: user.country || "zambia.svg",
           club: user.club || "N/A",
           name: user.name,
+          pfp: user.pfp || "default_pfp",
           ...attrMap
         };
       });
@@ -63,7 +64,10 @@ export default function ShowRoom() {
         {cardDeck.map((card, i) => (
           <FutPlayerCard
             key={i}
-            rating={card.rating}
+            position = {card.position}
+            nation={card.nation}
+            club={card.club}
+            playerImage = {card.pfp}
             name={card.name}
             pac={card.atr1 || 0}
             sho={card.atr2 || 0}
@@ -71,6 +75,7 @@ export default function ShowRoom() {
             dri={card.atr4 || 0}
             def={card.atr5 || 0}
             phy={card.atr6 || 0}
+            rating={(card.atr1 + card.atr2 + card.atr3 + card.atr4 + card.atr5 + card.atr6) / 6}
           />
         ))}
       </div>

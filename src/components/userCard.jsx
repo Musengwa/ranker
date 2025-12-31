@@ -23,7 +23,7 @@ const userCardStyles = `
   left: 0;
   right: 0;
   bottom: 0;
-  /* Default background is the provided artwork; candidate.pfp overrides via inline style when available */
+  /* Default background is the provided artwork; this image is used as the fixed card background */
   background-image: url('/images/1763198776206.jpg');
   background-size: cover;
   background-position: center;
@@ -62,10 +62,19 @@ const userCardStyles = `
   color: #e2e8f0;
 }
 
-.ranker-usercard-details {
-  font-size: 0.9rem;
-  color: #cbd5e1;
-  margin-bottom: 1rem;
+.ranker-usercard-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #7b2ff7 0%, #6f42c1 100%);
+  background-size: cover;
+  color: #ffffff;
+  border: 2px solid rgba(255,255,255,0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  flex-shrink: 0;
 }
 
 .ranker-usercard-attributes {
@@ -167,6 +176,11 @@ const userCardStyles = `
     font-size: 0.85rem;
   }
 
+  .ranker-usercard-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
   /* Keep attributes as a compact 2-column grid on mobile for better density */
   .ranker-usercard-attributes {
     grid-template-columns: repeat(2, 1fr);
@@ -204,12 +218,32 @@ if (typeof document !== "undefined" && !document.getElementById("ranker-usercard
   document.head.appendChild(style);
 }
 
+// Static inline SVG icon used for all user avatars (purple circle with white user outline)
+const STATIC_USER_SVG = `
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'>
+  <defs>
+    <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+      <stop offset='0' stop-color='#6f42c1'/>
+      <stop offset='1' stop-color='#7b2ff7'/>
+    </linearGradient>
+  </defs>
+  <circle cx='100' cy='100' r='96' fill='url(#g)' stroke='white' stroke-width='8'/>
+  <circle cx='100' cy='70' r='28' fill='white'/>
+  <path d='M60 140c20-24 60-24 80 0' fill='none' stroke='white' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/>
+</svg>`;
+
+const STATIC_USER_ICON = `data:image/svg+xml;utf8,${encodeURIComponent(STATIC_USER_SVG)}`;
+
 export default function UserCard({ candidate, voter }) {
   const [attributeValues, setAttributeValues] = useState({});
   const [attributes, setAttributes] = useState([]);
   const [openDetail, setOpenDetail] = useState(null);
   const [loading, setLoading] = useState(false);
   const [existingVoteId, setExistingVoteId] = useState(null);
+
+  // Static user icon: use a fixed purple avatar for all users (do not display candidate-specific images)
+  // This replaces the previous avatar resolution behavior that tried multiple filenames.
+
 
   useEffect(() => {
     // load attributes and any existing vote for this voter+candidate for the current year
@@ -371,14 +405,17 @@ export default function UserCard({ candidate, voter }) {
     <article className="ranker-usercard">
       <div
         className="ranker-usercard-bg"
-        style={{ backgroundImage: `url(${candidate?.pfp || '/images/1763198776206.jpg'})` }}
         aria-hidden="true"
-      ></div>
+      ></div> 
 
       <div className="ranker-usercard-overlay">
         <div className="ranker-usercard-header">
           <h2 className="ranker-usercard-name">
-            <FiUser size={20} />
+            <div
+              className="ranker-usercard-avatar"
+              aria-hidden="true"
+              style={{ backgroundImage: `url("${STATIC_USER_ICON}")` }}
+            />
             {candidate.name}
           </h2>
           <div className="ranker-usercard-details">{candidate.details}</div>

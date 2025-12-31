@@ -37,9 +37,11 @@ export default function Vote() {
         throw fetchErr;
       }
 
-      const usersList = users || [];
+      // Filter out the current user (server-side filter applied above when possible,
+      // this is an extra client-side safeguard)
+      const usersList = (users || []).filter(u => !(currentUser && u.id === currentUser.id));
 
-      // Set candidates to all other users (or all users if currentUser is not set)
+      // Set candidates to other users (or all users if no currentUser)
       setCandidates(usersList);
 
       // If we have a currentUser and want to refresh the context user from DB:

@@ -4,6 +4,22 @@ import { useEffect, useState } from "react";
 import "../pages/awardStyle.css";
 import { FiAlertTriangle, FiUser, FiInfo } from "react-icons/fi";
 
+// Static inline SVG icon used for all user avatars
+const STATIC_USER_SVG = `
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'>
+  <defs>
+    <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+      <stop offset='0' stop-color='#6f42c1'/>
+      <stop offset='1' stop-color='#7b2ff7'/>
+    </linearGradient>
+  </defs>
+  <circle cx='100' cy='100' r='96' fill='url(#g)' stroke='white' stroke-width='8'/>
+  <circle cx='100' cy='70' r='28' fill='white'/>
+  <path d='M60 140c20-24 60-24 80 0' fill='none' stroke='white' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/>
+</svg>`;
+
+const STATIC_USER_ICON = `data:image/svg+xml;utf8,${encodeURIComponent(STATIC_USER_SVG)}`;
+
 export default function SpecialAward({ award, groupId, onVoted }) {
   const { user: currentUser } = useUser();
   const [candidates, setCandidates] = useState([]);
@@ -337,12 +353,9 @@ export default function SpecialAward({ award, groupId, onVoted }) {
         <div className="voted-card">
           <div className="voted-avatar">
             <img
-              src={votedCandidate.pfp || "/default-avatar.png"}
+              src={STATIC_USER_ICON}
               alt={votedCandidate.name}
               className="avatar-image"
-              onError={(e) => {
-                e.target.src = "/default-avatar.png";
-              }}
             />
             <div className="voted-badge">Your Pick</div>
           </div>
@@ -446,12 +459,9 @@ export default function SpecialAward({ award, groupId, onVoted }) {
               >
                 <div className="candidate-avatar">
                   <img
-                    src={candidate.pfp || "/default-avatar.png"}
+                    src={STATIC_USER_ICON}
                     alt={candidate.name}
                     className="candidate-image"
-                    onError={(e) => {
-                      e.target.src = "/default-avatar.png";
-                    }}
                   />
                   <div className="vote-overlay">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -151,6 +151,10 @@ export default function Nav() {
   const navigate = useNavigate();
   const [navOpen, setNavOpen] = useState(false);
 
+  // Only users with id 11 or 13 can see Analysis and Show room tabs
+  const userId = Number(currentUser?.id);
+  const isPrivileged = userId === 11 || userId === 13;
+
   // Redirect to login if no user is logged in
   useEffect(() => {
     if (!currentUser) {
@@ -189,11 +193,13 @@ export default function Nav() {
               <FaHome size={18} /> <span>Home</span>
             </Link>
           </li>
-          <li>
-            <Link to="/analysis" title="View Analysis" onClick={closeMenu}>
-              <FaChartBar size={18} /> <span>Analysis</span>
-            </Link>
-          </li>
+          {isPrivileged && (
+            <li>
+              <Link to="/analysis" title="View Analysis" onClick={closeMenu}>
+                <FaChartBar size={18} /> <span>Analysis</span>
+              </Link>
+            </li>
+          )} 
           <li>
             <Link to="/voting" title="Go to Voting Page" onClick={closeMenu}>
               <FaVoteYea size={18} /> <span>Voting</span>
@@ -204,11 +210,13 @@ export default function Nav() {
               <FaAward size={18} /> <span>Awards</span>
             </Link>
           </li>
-          <li>
-            <Link to="/results" title="See results" onClick={closeMenu}>
-              <FaTimes size={18} /> <span>Show room</span>
-            </Link>
-          </li>
+          {isPrivileged && (
+            <li>
+              <Link to="/results" title="See results" onClick={closeMenu}>
+                <FaTimes size={18} /> <span>Show room</span>
+              </Link>
+            </li>
+          )} 
           <li>
             <Link to="/login" onClick={() => { handleLogout(); closeMenu(); }} title="Log out of your account">
               <FaSignOutAlt size={18} /> <span>Logout</span>

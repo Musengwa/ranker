@@ -2,20 +2,18 @@ import React from 'react';
 import './FutPlayCard.css'; // We'll extract the CSS to a separate file
 
 const FutPlayerCard = ({
-  rating = 97,
   position = "RW",
-  nation = "zambia.jpg",
+  nation = "Zambia.jpg",
   club = "manchester_united.png",
-  playerImage = "messi.png",
-  skills = 4,
-  weakFoot = 4,
+  playerImage = "messi",
   name = "MESSI",
-  pac = 97,
-  sho = 95,
-  pas = 94,
-  dri = 99,
-  def = 35,
-  phy = 68
+  pac = 0,
+  sho = 0,
+  pas = 0,
+  dri = 0,
+  def = 0,
+  phy = 0,
+  rating = (pac + sho + pas + dri + def + phy) / 6,
 }) => {
   return (
     <>      
@@ -32,28 +30,26 @@ const FutPlayerCard = ({
               </div>
               <div className="player-nation">
                 <img 
-                  src={`/images/${nation}`} 
-                  alt={nation.replace('.svg', '')} 
+                  src={`/images/${nation}.png`} 
+                  alt={nation.replace('.png', '')} 
                   draggable="false" 
                 />
               </div>
               <div className="player-club">
                 <img 
-                  src={`/images/${club}`} 
-                  alt={club.replace('.svg', '')} 
+                  src={`/images/${club}.png`} 
+                  alt={club.replace('.png', '')} 
                   draggable="false" 
                 />
               </div>
             </div>
             <div className="player-picture">
               <img 
-                src={`/images/${playerImage}`} 
-                alt={name} 
+                src={`/images/${playerImage}.png`} 
+                alt={playerImage.replace('.png', '')}  
                 draggable="false" 
               />
               <div className="player-extra">
-                <span>{skills}*SM</span>
-                <span>{weakFoot}*WF</span>
               </div>
             </div>
           </div>
@@ -71,29 +67,29 @@ const FutPlayerCard = ({
                 <div className="player-features-col">
                   <span>
                     <div className="player-feature-value">{pac}</div>
-                    <div className="player-feature-title">PAC</div>
+                    <div className="player-feature-title">HUN</div>
                   </span>
                   <span>
                     <div className="player-feature-value">{sho}</div>
-                    <div className="player-feature-title">SHO</div>
+                    <div className="player-feature-title">WIS</div>
                   </span>
                   <span>
                     <div className="player-feature-value">{pas}</div>
-                    <div className="player-feature-title">PAS</div>
+                    <div className="player-feature-title">DRI</div>
                   </span>
                 </div>
                 <div className="player-features-col">
                   <span>
                     <div className="player-feature-value">{dri}</div>
-                    <div className="player-feature-title">DRI</div>
+                    <div className="player-feature-title">FNY</div>
                   </span>
                   <span>
                     <div className="player-feature-value">{def}</div>
-                    <div className="player-feature-title">DEF</div>
+                    <div className="player-feature-title">DGN</div>
                   </span>
                   <span>
                     <div className="player-feature-value">{phy}</div>
-                    <div className="player-feature-title">PHY</div>
+                    <div className="player-feature-title">REL</div>
                   </span>
                 </div>
               </div>

@@ -154,7 +154,8 @@ const HandleDisplay = () => {
     // For quick UI marks: for each award, check if there exists a vote_award_values entry for this voter+year linking to the award
     try {
       if (!voterId) return awardsList;
-      // get votes IDs for this voter + year
+
+      // get votes IDs for this voter + year (we also need candidateid)
       const { data: votesForVoter, error: votesErr } = await supabase
         .from("votes")
         .select("id,candidateid")
@@ -163,7 +164,10 @@ const HandleDisplay = () => {
 
       if (votesErr) throw votesErr;
       const voteIds = (votesForVoter || []).map(v => v.id);
-      if (voteIds.length === 0) return awardsList;
+      if (voteIds.length === 0) {
+        // no votes yet — mark nothing
+        return awardsList.map(a => ({ ...a, _votedByCurrentUser: false, _votedCandidateName: null }));
+      }
 
       const { data: awardLinks, error: awardLinksErr } = await supabase
         .from("vote_award_values")
@@ -178,11 +182,40 @@ const HandleDisplay = () => {
         if (!awardToVote[al.awardid]) awardToVote[al.awardid] = al.voteid;
       });
 
-      // Map voteId -> candidate name using votesForVoter array candidateid -> users
+      // Ensure we have candidate user records for all votes (avoid missing names)
+      const candidateIds = [...new Set((votesForVoter || []).map(v => v.candidateid).filter(Boolean))];
+      const missingCandidateIds = candidateIds.filter(id => !users.find(u => String(u.id) === String(id)));
+
+      let fetchedCandidates = [];
+      if (missingCandidateIds.length > 0) {
+        const { data: fetched, error: fetchedErr } = await supabase
+          .from("users")
+          .select("*")
+          .in("id", missingCandidateIds.map(String));
+
+        if (fetchedErr) {
+          console.warn("Could not fetch missing candidate users:", fetchedErr);
+        } else {
+          fetchedCandidates = fetched || [];
+          // merge into users state to cache them for later
+          setUsers(prev => {
+            const existingIds = new Set(prev.map(u => String(u.id)));
+            const toAdd = fetchedCandidates.filter(c => !existingIds.has(String(c.id)));
+            return toAdd.length ? [...prev, ...toAdd] : prev;
+          });
+        }
+      }
+
+      // Build a local map of id -> name using both cached users and fetched candidates
+      const localUserMap = {};
+      (users || []).forEach(u => { localUserMap[String(u.id)] = u.name; });
+      fetchedCandidates.forEach(u => { localUserMap[String(u.id)] = u.name; });
+
+      // Map voteId -> candidate name using votesForVoter -> localUserMap
       const voteIdToCandidateName = {};
       for (const v of votesForVoter) {
-        const cand = users.find(u => String(u.id) === String(v.candidateid));
-        if (cand) voteIdToCandidateName[v.id] = cand.name;
+        const candName = localUserMap[String(v.candidateid)] || null;
+        if (candName) voteIdToCandidateName[v.id] = candName;
       }
 
       // Attach helper flags to awards
@@ -300,6 +333,28 @@ const HandleDisplay = () => {
     reload();
   }, [handleMyVotes]);
 
+  // Realtime: refresh when any vote_award_values change so dashboard reflects votes immediately
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const channel = supabase
+      .channel('public:vote_award_values')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'vote_award_values' }, () => {
+        // Refresh the current user's votes/award marks — handleMyVotes is safe and will be a no-op if not needed
+        handleMyVotes();
+      })
+      .subscribe();
+
+    return () => {
+      try {
+        supabase.removeChannel(channel);
+      } catch (err) {
+        // supabase client variations may use different unsubscribe methods; don't let this crash
+        console.warn('Failed to remove realtime channel', err);
+      }
+    };
+  }, [currentUser, handleMyVotes]);
+
   const fetchCandidateAndVoter = useCallback(async (candidateID, voterID) => {
     try {
       // Try to use cached users first
@@ -365,10 +420,8 @@ const HandleDisplay = () => {
 
   // Stats data for dashboard (you can compute live values with queries later)
   const stats = [
-    { icon: <FiUsers />, value: "24", label: "Total Candidates" },
+    { icon: <FiUsers />, value: "9", label: "Total Candidates" },
     { icon: <FiThumbsUp />, value: String(myVotes.length), label: "Your Votes" },
-    { icon: <FiActivity />, value: "92%", label: "Participation Rate" },
-    { icon: <FiTrendingUp />, value: "7", label: "Awards Won" }
   ];
 
   return (
