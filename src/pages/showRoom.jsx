@@ -30,17 +30,26 @@ export default function ShowRoom() {
         return;
       }
 
-      // Build card deck
+      // Build card deck (round attribute averages to integers and compute integer rating)
       const deck = users.map(user => {
         const userAttrs = attrs.filter(a => a.candidateid === user.id);
 
         const attrMap = {};
         userAttrs.forEach(row => {
-          attrMap[`atr${row.attributeid}`] = row.avgrating || 0;
+          // Ensure we store integer values
+          attrMap[`atr${row.attributeid}`] = Math.round(Number(row.avgrating) || 0);
         });
 
+        const a1 = attrMap.atr1 || 0;
+        const a2 = attrMap.atr2 || 0;
+        const a3 = attrMap.atr3 || 0;
+        const a4 = attrMap.atr4 || 0;
+        const a5 = attrMap.atr5 || 0;
+        const a6 = attrMap.atr6 || 0;
+
         return {
-          rating: 0,
+          // Integer rating (rounded average of attributes)
+          rating: Math.round((a1 + a2 + a3 + a4 + a5 + a6) / 6) || 0,
           position: user.position || "N/A",
           nation: user.country || "zambia.svg",
           club: user.club || "N/A",
@@ -75,7 +84,7 @@ export default function ShowRoom() {
             dri={card.atr4 || 0}
             def={card.atr5 || 0}
             phy={card.atr6 || 0}
-            rating={(card.atr1 + card.atr2 + card.atr3 + card.atr4 + card.atr5 + card.atr6) / 6}
+            rating={card.rating || 0}
           />
         ))}
       </div>

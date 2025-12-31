@@ -406,13 +406,7 @@ export default function Login() {
           {error && <div className="ranker-login-error">{error}</div>}
           {success && <div className="ranker-login-success">{success}</div>}
           
-          {/* Debug info - will help us see what's happening */}
-          <div className="ranker-login-debug">
-            <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Debug Info:</div>
-            <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
-              {debugInfo || "No debug information yet. Try logging in."}
-            </pre>
-          </div>
+
           
           {/* Test credentials reminder */}
           <div style={{ 

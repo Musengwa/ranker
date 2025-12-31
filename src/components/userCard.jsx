@@ -157,6 +157,25 @@ const userCardStyles = `
   z-index: 3;
 }
 
+.ranker-usercard-notification {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  padding: 0.55rem 0.9rem;
+  border-radius: 0.6rem;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  min-width: 180px;
+  text-align: center;
+  opacity: 0.98;
+}
+.ranker-usercard-notification.success { background: linear-gradient(90deg,#10b981,#34d399); color: #061b13; }
+.ranker-usercard-notification.error { background: linear-gradient(90deg,#f97316,#ef4444); }
+.ranker-usercard-notification.info { background: linear-gradient(90deg,#6366f1,#8b5cf6); }
+
 @media (max-width: 480px) {
   .ranker-usercard {
     max-width: 98%;
@@ -241,6 +260,13 @@ export default function UserCard({ candidate, voter }) {
   const [loading, setLoading] = useState(false);
   const [existingVoteId, setExistingVoteId] = useState(null);
 
+  // Notifications: non-blocking popup messages
+  const [notification, setNotification] = useState(null);
+  const showNotification = (message, type = 'info', duration = 3500) => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), duration);
+  };
+
   // Static user icon: use a fixed purple avatar for all users (do not display candidate-specific images)
   // This replaces the previous avatar resolution behavior that tried multiple filenames.
 
@@ -321,7 +347,7 @@ export default function UserCard({ candidate, voter }) {
   const handleAttributesValues = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (!voter || !voter.id || !candidate || !candidate.id) {
-      alert("Missing voter or candidate information.");
+      showNotification("Missing voter or candidate information.", 'error');
       return;
     }
 
@@ -392,10 +418,10 @@ export default function UserCard({ candidate, voter }) {
       }
 
       // Optionally, you may want to create a record in vote_award_values here where appropriate
-      alert("Vote saved successfully!");
+      showNotification("Vote saved successfully!", 'success');
     } catch (error) {
       console.error("Error submitting or updating vote:", error);
-      alert("Failed to save vote. See console for details.");
+      showNotification("Failed to save vote. See console for details.", 'error');
     } finally {
       setLoading(false);
     }
@@ -409,6 +435,9 @@ export default function UserCard({ candidate, voter }) {
       ></div> 
 
       <div className="ranker-usercard-overlay">
+        {notification && (
+          <div className={`ranker-usercard-notification ${notification.type}`} role="status" aria-live="polite">{notification.message}</div>
+        )}
         <div className="ranker-usercard-header">
           <h2 className="ranker-usercard-name">
             <div
