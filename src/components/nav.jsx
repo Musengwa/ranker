@@ -201,8 +201,8 @@ export default function Nav() {
             </li>
           )} 
           <li>
-            <Link to="/voting" title="Go to Voting Page" onClick={closeMenu}>
-              <FaVoteYea size={18} /> <span>Voting</span>
+            <Link to="/voting" title="Go to ranking Page" onClick={closeMenu}>
+              <FaVoteYea size={18} /> <span>rank</span>
             </Link>
           </li>
           <li>
