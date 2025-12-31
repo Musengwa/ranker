@@ -153,7 +153,7 @@ export default function Nav() {
 
   // Only users with id 11 or 13 can see Analysis and Show room tabs
   const userId = Number(currentUser?.id);
-  const isPrivileged = userId === 11 || userId === 13;
+  const isPrivileged = userId === 11 || userId === 14;
 
   // Redirect to login if no user is logged in
   useEffect(() => {
